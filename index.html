@@ -1,0 +1,3777 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Момент истины</title>
+  <style>
+    :root {
+  --mot-bg: #06111f;
+  --mot-bg-deep: #030814;
+  --mot-panel: rgba(10, 19, 35, 0.74);
+  --mot-panel-2: rgba(14, 27, 49, 0.9);
+  --mot-panel-solid: #0f1b31;
+  --mot-text: #f5fbff;
+  --mot-muted: #90a6c3;
+
+  --mot-accent: #59f3b2;
+  --mot-accent-2: #49d8ff;
+  --mot-accent-3: #ffd76a;
+
+  --mot-danger: #ff5f7a;
+  --mot-warning: #ffb84d;
+  --mot-correct: #39d98a;
+  --mot-wrong: #ff5f7a;
+
+  --mot-border: rgba(125, 211, 252, 0.16);
+  --mot-grid: rgba(73, 216, 255, 0.05);
+  --mot-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+
+  --mot-radius: 18px;
+
+  --mot-scene-top: #0b1d33;
+  --mot-scene-mid: #081426;
+  --mot-scene-bottom: #050c18;
+  --mot-scene-glow-1: rgba(22,126,173,0.16);
+  --mot-scene-glow-2: rgba(21,74,112,0.10);
+  --mot-scene-aurora-1: rgba(63,143,198,0.14);
+  --mot-scene-aurora-2: rgba(63,143,198,0.10);
+  --mot-scene-aurora-3: rgba(30,126,148,0.10);
+  --mot-grid-line: rgba(73,216,255,0.035);
+
+  --mot-panel-top: rgba(10,19,34,0.90);
+  --mot-panel-bottom: rgba(5,10,20,0.94);
+  --mot-panel-glow: rgba(92,154,196,0.04);
+  --mot-panel-border: rgba(96,140,180,0.10);
+  --mot-intro-overlay-top: rgba(2,6,16,0.62);
+  --mot-intro-overlay-bottom: rgba(2,6,16,0.78);
+  --mot-intro-card-top: rgba(10,19,34,0.96);
+  --mot-intro-card-bottom: rgba(6,11,21,0.98);
+  --mot-intro-card-border: rgba(122,176,219,0.18);
+
+  --mot-font-body: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mot-font-display: "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mot-font-tech: "Bahnschrift", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mot-font-ui: var(--mot-font-body);
+  --mot-font-hud-label: var(--mot-font-tech);
+  --mot-font-hud-value: var(--mot-font-display);
+  --mot-font-question: var(--mot-font-display);
+  --mot-font-button: var(--mot-font-tech);
+  --mot-font-feedback: var(--mot-font-ui);
+  --mot-font: var(--mot-font-ui);
+  --mot-title-font: var(--mot-font-question);
+
+  --mot-answer-font-size: clamp(14px, 2vw, 18px);
+  --mot-question-font-size: clamp(18px, 2.2vw, 28px);
+  --mot-hud-font-size: clamp(12px, 1.3vw, 14px);
+
+  --mot-indicator-size: 34px;
+  --mot-rail-height: 18px;
+  --mot-band-height: 92px;
+  --mot-shell-gap: 14px;
+  --mot-shell-padding: 18px;
+  --mot-track-height: 42px;
+  --mot-main-gap: 16px;
+  --mot-main-padding: 18px;
+  --mot-question-height: 132px;
+  --mot-question-min-height: 112px;
+  --mot-rail-frame-height: 84px;
+  --mot-answer-wrap-bottom: 14px;
+  --mot-answer-band-min-height: 148px;
+  --mot-answer-cell-min-height: 120px;
+  --mot-answer-cell-font-size: clamp(20px, 2.3vw, 30px);
+  --mot-controls-min-height: 56px;
+  --mot-btn-min-height: 48px;
+  --mot-feedback-height: 58px;
+  --mot-timer-pill-height: 42px;
+
+  --mot-anim-fast: 160ms;
+  --mot-anim-mid: 280ms;
+  --mot-anim-slow: 500ms;
+}
+
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      font-family: var(--mot-font-ui);
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 0;
+    }
+
+.mot-root {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  color: var(--mot-text);
+  background:
+    radial-gradient(circle at 50% 100%, var(--mot-scene-glow-1), transparent 28%),
+    radial-gradient(circle at 50% 30%, var(--mot-scene-glow-2), transparent 26%),
+    linear-gradient(180deg, var(--mot-scene-top) 0%, var(--mot-scene-mid) 42%, var(--mot-scene-bottom) 100%);
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+
+
+.mot-root::before {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  background:
+    radial-gradient(circle at 14% 18%, var(--mot-scene-aurora-1), transparent 16%),
+    radial-gradient(circle at 84% 18%, var(--mot-scene-aurora-2), transparent 16%),
+    radial-gradient(circle at 50% 76%, var(--mot-scene-aurora-3), transparent 24%);
+  filter: blur(54px);
+  opacity: 0.78;
+  animation: motAuroraDrift 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+
+.mot-root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--mot-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mot-grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+
+@keyframes motAuroraDrift {
+  0% {
+    transform: translate3d(-2%, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, -1%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(0, 2%, 0) scale(1.08);
+  }
+}
+
+
+    .mot-shell {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: var(--mot-shell-gap);
+      padding: var(--mot-shell-padding);
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+.mot-panel {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, var(--mot-panel-top), var(--mot-panel-bottom)),
+    radial-gradient(circle at 50% 0%, var(--mot-panel-glow), transparent 56%);
+  border: 1px solid var(--mot-panel-border);
+  border-radius: var(--mot-radius);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    inset 0 -1px 0 rgba(73,216,255,0.02);
+  backdrop-filter: blur(14px) saturate(130%);
+}
+
+.mot-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(73,216,255,0.24),
+    rgba(89,243,178,0.16),
+    transparent
+  );
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+
+    .mot-hud {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px 12px;
+      font-size: var(--mot-hud-font-size);
+      flex-shrink: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0)),
+        radial-gradient(circle at 50% -90%, rgba(73,216,255,0.04), transparent 54%);
+    }
+
+    .mot-hud::after {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 0;
+      height: 18px;
+      background: radial-gradient(circle at 50% 50%, rgba(73,216,255,0.06), transparent 74%);
+      filter: blur(14px);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .mot-stat {
+      position: relative;
+      isolation: isolate;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 10px 12px 12px;
+      min-width: 0;
+      min-height: 72px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
+        linear-gradient(180deg, rgba(16,28,48,0.88), rgba(8,14,26,0.94));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.03),
+        inset 0 -1px 0 rgba(0,0,0,0.18),
+        0 8px 16px rgba(0,0,0,0.10);
+      transition: transform var(--mot-anim-fast) ease, border-color var(--mot-anim-fast) ease, box-shadow var(--mot-anim-fast) ease, background var(--mot-anim-fast) ease;
+    }
+
+    .mot-stat::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), transparent 34%),
+        radial-gradient(circle at 18% 0%, rgba(255,255,255,0.04), transparent 24%);
+      pointer-events: none;
+    }
+
+    .mot-stat::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      opacity: 0.46;
+      pointer-events: none;
+    }
+
+    .mot-stat--highlight {
+      border-color: rgba(56,189,248,0.22);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 0 0 1px rgba(56,189,248,0.08),
+        0 10px 24px rgba(0,0,0,0.14),
+        0 0 16px rgba(56,189,248,0.08);
+    }
+
+    .mot-stat--danger {
+      border-color: rgba(239,68,68,0.45);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)),
+        linear-gradient(135deg, rgba(88,30,46,0.82), rgba(39,13,23,0.82));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 0 0 1px rgba(239,68,68,0.10),
+        0 0 18px rgba(239,68,68,0.10);
+      animation: motDangerPulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes motDangerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .mot-stat__label {
+      position: relative;
+      z-index: 1;
+      font-family: var(--mot-font-hud-label);
+      color: #8ca4bf;
+      font-size: 10px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .mot-stat__value {
+      position: relative;
+      z-index: 1;
+      font-family: var(--mot-font-hud-value);
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: none;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    .mot-stat--combo {
+      background:
+        radial-gradient(circle at 50% -24%, rgba(73,216,255,0.12), transparent 54%),
+        linear-gradient(180deg, rgba(18,34,58,0.92), rgba(8,17,31,0.94));
+      border-color: rgba(73,216,255,0.14);
+    }
+
+    .mot-stat--progress {
+      background:
+        radial-gradient(circle at 50% -22%, rgba(116,178,255,0.10), transparent 54%),
+        linear-gradient(180deg, rgba(18,31,52,0.90), rgba(8,16,29,0.94));
+      border-color: rgba(120,188,255,0.12);
+    }
+
+    .mot-stat--score {
+      background:
+        radial-gradient(circle at 50% -18%, rgba(255,215,106,0.10), transparent 54%),
+        linear-gradient(180deg, rgba(34,30,23,0.86), rgba(10,18,31,0.94));
+      border-color: rgba(255,215,106,0.12);
+    }
+
+    .mot-stat--score .mot-stat__value {
+      color: #fff3cb;
+    }
+
+    .mot-stat--lives {
+      background:
+        radial-gradient(circle at 50% -16%, rgba(255,95,122,0.10), transparent 56%),
+        linear-gradient(180deg, rgba(39,24,32,0.88), rgba(10,18,31,0.94));
+      border-color: rgba(255,95,122,0.12);
+    }
+
+    .mot-stat--lives .mot-stat__value {
+      color: #fff3f6;
+      letter-spacing: 0.06em;
+    }
+
+    .mot-stat--goal {
+      background:
+        radial-gradient(circle at 50% -18%, rgba(89,243,178,0.10), transparent 56%),
+        linear-gradient(180deg, rgba(17,39,38,0.86), rgba(9,18,31,0.94));
+      border-color: rgba(89,243,178,0.12);
+    }
+
+    .mot-stat--progress .mot-stat__value,
+    .mot-stat--goal .mot-stat__value,
+    .mot-stat--combo .mot-stat__value {
+      font-size: 18px;
+    }
+
+    .mot-stat--score::after,
+    .mot-stat--combo::after,
+    .mot-stat--lives::after,
+    .mot-stat--goal::after {
+      opacity: 0.72;
+    }
+
+    .mot-stat--score::after {
+      background: linear-gradient(90deg, transparent, rgba(255,215,106,0.20), transparent);
+    }
+
+    .mot-stat--combo::after {
+      background: linear-gradient(90deg, transparent, rgba(73,216,255,0.20), transparent);
+    }
+
+    .mot-stat--lives::after {
+      background: linear-gradient(90deg, transparent, rgba(255,95,122,0.20), transparent);
+    }
+
+    .mot-stat--goal::after {
+      background: linear-gradient(90deg, transparent, rgba(89,243,178,0.20), transparent);
+    }
+
+    .mot-score-counting {
+      color: #fde68a;
+      text-shadow: 0 0 14px rgba(245,158,11,0.24);
+    }
+
+    .mot-progress {
+      padding: 12px 16px 14px;
+      flex-shrink: 0;
+      background:
+        linear-gradient(180deg, rgba(9,18,31,0.88), rgba(7,14,26,0.92)),
+        radial-gradient(circle at 50% 0%, rgba(73,216,255,0.04), transparent 58%);
+    }
+    .mot-progress__header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .mot-progress__title {
+      font-family: var(--mot-font-hud-label);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #e6f4ff;
+    }
+    .mot-progress__meta {
+      font-family: var(--mot-font-ui);
+      color: var(--mot-muted);
+      font-size: 12px;
+      max-width: 42ch;
+      text-align: right;
+    }
+
+    .mot-track {
+      position: relative;
+      height: var(--mot-track-height);
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+        linear-gradient(90deg, #101a2b, #172234);
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+    .mot-track__fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(34,197,94,0.45), rgba(56,189,248,0.45));
+      transition: width var(--mot-anim-slow) ease;
+      z-index: 1;
+    }
+    .mot-track__ticks {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .mot-track__tick { border-right: 1px solid rgba(255,255,255,0.06); }
+    .mot-track__tick:last-child { border-right: none; }
+    .mot-track__runner {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      line-height: 1;
+      transition: left var(--mot-anim-slow) ease;
+      pointer-events: none;
+      z-index: 4;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.30));
+    }
+    .mot-track__runner::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(18,33,56,0.98), rgba(9,17,30,1));
+      border: 1px solid rgba(118,174,217,0.20);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        0 10px 18px rgba(0,0,0,0.18);
+      transform: rotate(45deg);
+    }
+    .mot-track__runner::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle, rgba(245,251,255,0.96) 0 26%, rgba(73,216,255,0.92) 27% 60%, rgba(73,216,255,0.14) 61% 100%);
+      box-shadow:
+        0 0 0 1px rgba(73,216,255,0.22),
+        0 0 18px rgba(73,216,255,0.28);
+      transform: rotate(45deg);
+    }
+    .mot-track__runner-badge {
+      position: absolute;
+      left: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(15,28,47,0.96), rgba(9,16,29,0.98));
+      border: 1px solid rgba(118,174,217,0.16);
+      color: #cfe3f3;
+      font-family: var(--mot-font-hud-label);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 8px 16px rgba(0,0,0,0.18);
+    }
+    .mot-track__runner--image::before,
+    .mot-track__runner--image::after {
+      display: none;
+    }
+    .mot-track__runner--image {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background:
+        linear-gradient(180deg, rgba(15,28,47,0.96), rgba(9,16,29,0.98));
+      border: 1px solid rgba(118,174,217,0.18);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 10px 18px rgba(0,0,0,0.22);
+      overflow: hidden;
+    }
+    .mot-track__runner--image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+    }
+    .mot-track__finish {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 28px;
+      padding: 0 12px 0 10px;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(16,28,47,0.96), rgba(9,16,29,0.98)),
+        radial-gradient(circle at 0% 50%, rgba(73,216,255,0.10), transparent 42%);
+      border: 1px solid rgba(118,174,217,0.18);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 8px 18px rgba(0,0,0,0.20);
+      color: #d8ebf8;
+      font-family: var(--mot-font-hud-label);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .mot-track__finish::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle, rgba(245,251,255,0.95) 0 34%, rgba(73,216,255,0.92) 35% 62%, rgba(73,216,255,0.12) 63% 100%);
+      box-shadow:
+        0 0 0 1px rgba(73,216,255,0.18),
+        0 0 14px rgba(73,216,255,0.24);
+      flex: 0 0 auto;
+    }
+    .mot-track__finish::after {
+      content: "";
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      width: 2px;
+      height: 24px;
+      transform: translateY(-50%);
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(245,251,255,0.18), rgba(73,216,255,0.82), rgba(245,251,255,0.18));
+      box-shadow: 0 0 12px rgba(73,216,255,0.26);
+    }
+
+.mot-main {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto;
+  gap: var(--mot-main-gap);
+  padding: var(--mot-main-padding);
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  align-content: start;
+  border-radius: calc(var(--mot-radius) + 8px);
+  background:
+    radial-gradient(circle at 50% 14%, rgba(73,216,255,0.08), transparent 20%),
+    radial-gradient(circle at 50% 56%, rgba(73,216,255,0.06), transparent 18%),
+    radial-gradient(circle at 50% 72%, rgba(89,243,178,0.06), transparent 30%),
+    linear-gradient(180deg, rgba(8,17,31,0.92), rgba(4,10,20,0.98));
+  border: 1px solid rgba(89, 150, 206, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 0 56px rgba(73,216,255,0.02),
+    inset 0 -30px 80px rgba(0,0,0,0.24),
+    0 22px 46px rgba(0,0,0,0.26);
+  transition:
+    transform var(--mot-anim-mid) ease,
+    box-shadow var(--mot-anim-mid) ease,
+    border-color var(--mot-anim-mid) ease;
+}
+
+.mot-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(73,216,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(73,216,255,0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.mot-main::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  width: min(64%, 760px);
+  height: 62%;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(73,216,255,0.16), transparent 22%),
+    radial-gradient(circle at 50% 54%, rgba(73,216,255,0.08), transparent 22%),
+    radial-gradient(circle at 50% 78%, rgba(89,243,178,0.08), transparent 28%);
+  filter: blur(42px);
+  opacity: 0.58;
+  animation: motStagePulse 7.2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes motStagePulse {
+  0% {
+    transform: translateX(-50%) scale(0.96);
+    opacity: 0.62;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.02);
+    opacity: 0.88;
+  }
+  100% {
+    transform: translateX(-50%) scale(1.05);
+    opacity: 0.74;
+  }
+}
+
+
+.mot-question {
+  position: relative;
+  width: min(100%, 1320px);
+  margin-inline: auto;
+  padding: 18px 90px 18px 24px;
+  line-height: 1.35;
+  font-size: var(--mot-question-font-size);
+  font-weight: 800;
+  text-align: center;
+  min-height: var(--mot-question-min-height);
+  height: var(--mot-question-height);
+  max-height: var(--mot-question-height);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 24px;
+  color: var(--mot-text);
+  background:
+    radial-gradient(circle at 50% 46%, rgba(73,216,255,0.08), transparent 52%),
+    linear-gradient(180deg, rgba(16,29,49,0.98), rgba(7,14,27,0.98));
+  border: 1px solid rgba(95, 145, 188, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    inset 0 0 24px rgba(73,216,255,0.03),
+    0 14px 28px rgba(2,8,18,0.22),
+    0 0 0 1px rgba(73,216,255,0.02);
+  transition:
+    transform var(--mot-anim-mid) ease,
+    opacity var(--mot-anim-mid) ease,
+    box-shadow var(--mot-anim-mid) ease,
+    border-color var(--mot-anim-mid) ease;
+}
+
+.mot-question::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(73,216,255,0.06), transparent);
+  transform: translateX(-100%);
+  animation: motQuestionSweep 4.8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes motQuestionSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+
+ .mot-question--boss::after,
+.mot-question--speed::after,
+.mot-question--safe::after,
+.mot-question--double::after {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(8, 16, 31, 0.78);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  text-transform: uppercase;
+}
+
+.mot-question--boss::after {
+  content: 'УСИЛЕНИЕ';
+  color: #ff8ca1;
+  border-color: rgba(255,95,122,0.38);
+  box-shadow: 0 0 18px rgba(255,95,122,0.16);
+}
+
+.mot-question--speed::after {
+  content: 'ТЕМП';
+  color: #ffe27a;
+  border-color: rgba(255,215,106,0.34);
+  box-shadow: 0 0 18px rgba(255,215,106,0.14);
+}
+
+.mot-question--safe::after {
+  content: 'ЩИТ';
+  color: #8fe9ff;
+  border-color: rgba(73,216,255,0.34);
+  box-shadow: 0 0 18px rgba(73,216,255,0.14);
+}
+
+.mot-question--double::after {
+  content: 'X2 ШАГ';
+  color: #86ffcb;
+  border-color: rgba(89,243,178,0.34);
+  box-shadow: 0 0 18px rgba(89,243,178,0.14);
+}
+
+
+    .mot-question__inner {
+      position: relative;
+      font-family: var(--mot-font-question);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      width: 100%;
+      text-shadow:
+        0 6px 18px rgba(0,0,0,0.22);
+      letter-spacing: -0.03em;
+      transition:
+        transform var(--mot-anim-mid) ease,
+        opacity var(--mot-anim-mid) ease,
+        filter var(--mot-anim-mid) ease;
+    }
+
+  .mot-rail-wrap {
+  position: relative;
+  width: min(100%, 1460px);
+  margin-inline: auto;
+  padding: 8px 16px 0;
+  flex-shrink: 0;
+}
+.mot-rail-wrap::before {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 8px;
+  height: 54px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(73,216,255,0.22), transparent 66%),
+    radial-gradient(circle at 50% 50%, rgba(89,243,178,0.10), transparent 72%);
+  filter: blur(22px);
+  pointer-events: none;
+}
+
+.mot-rail-wrap::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 2px;
+  height: 26px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 50%, rgba(73,216,255,0.16), transparent 70%);
+  filter: blur(20px);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.mot-rail-frame {
+  position: relative;
+  height: var(--mot-rail-frame-height);
+  display: flex;
+  align-items: center;
+}
+
+.mot-rail-frame::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  height: 42px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent),
+    radial-gradient(circle at 50% 50%, rgba(73,216,255,0.12), transparent 68%);
+  filter: blur(20px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.mot-rail {
+  position: relative;
+  width: 100%;
+  height: var(--mot-rail-height);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(214,232,255,0.22), rgba(255,255,255,0.04)),
+    linear-gradient(90deg, rgba(39,55,84,0.98), rgba(82,103,136,0.94) 52%, rgba(44,62,94,0.98));
+  border: 1px solid rgba(164,213,255,0.22);
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.20),
+    0 0 28px rgba(73,216,255,0.14),
+    0 10px 26px rgba(0,0,0,0.18);
+}
+
+.mot-rail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  opacity: 0.9;
+  animation: motRailSweep 3.6s linear infinite;
+  pointer-events: none;
+}
+
+.mot-rail::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 50%;
+  height: 6px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(73,216,255,0.08), rgba(255,255,255,0.42), rgba(89,243,178,0.10));
+  opacity: 0.65;
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+@keyframes motRailSweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+    .mot-rail__segments {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      pointer-events: none;
+    }
+    .mot-rail__segment { border-right: 1px solid rgba(255,255,255,0.05); opacity: 0.18; position: relative; }
+    .mot-rail__segment:last-child { border-right: none; }
+    .mot-rail--hide-borders .mot-rail__segment { border-right-color: transparent; }
+    .mot-rail__segment--correct { background: rgba(34,197,94,0.35); opacity: 1; }
+    .mot-rail__segment--wrong { background: rgba(239,68,68,0.35); opacity: 1; }
+    
+
+    .mot-indicator {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: var(--mot-indicator-size);
+      height: var(--mot-indicator-size);
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      line-height: 1;
+      transition: filter var(--mot-anim-fast) ease, transform var(--mot-anim-fast) ease;
+      z-index: 6;
+      pointer-events: none;
+      will-change: left;
+      filter:
+        drop-shadow(0 8px 14px rgba(0,0,0,0.34))
+        drop-shadow(0 0 18px rgba(255,255,255,0.10))
+        drop-shadow(0 0 24px rgba(73,216,255,0.22));
+    }
+
+    .mot-indicator__inner {
+  transform-origin: center;
+}
+
+.mot-indicator--moving .mot-indicator__inner {
+  animation: motRunBob 0.6s ease-in-out infinite;
+}
+
+
+    .mot-indicator--frozen {
+      filter: drop-shadow(0 0 12px rgba(56,189,248,0.75)) drop-shadow(0 0 28px rgba(56,189,248,0.35));
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+    .mot-indicator--frozen .mot-indicator__inner { animation: none; }
+
+    @keyframes motRunBob {
+      0%, 100% { transform: translateY(0px) rotate(-2deg); }
+      50% { transform: translateY(-2px) rotate(2deg); }
+    }
+
+.mot-answer-band-wrap {
+  width: min(100%, 1500px);
+  margin-inline: auto;
+  padding: 6px 16px var(--mot-answer-wrap-bottom);
+  flex-shrink: 0;
+}
+
+.mot-answer-band {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: 10px;
+  height: auto;
+  min-height: var(--mot-answer-band-min-height);
+  max-height: none;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(8,19,36,0.92), rgba(7,14,26,0.96)),
+    radial-gradient(circle at 50% 100%, rgba(73,216,255,0.04), transparent 42%);
+  border: 1px solid rgba(95,145,188,0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 16px 34px rgba(0,0,0,0.20),
+    inset 0 0 32px rgba(73,216,255,0.02);
+  transition:
+    transform var(--mot-anim-mid) ease,
+    opacity var(--mot-anim-mid) ease,
+    box-shadow var(--mot-anim-mid) ease,
+    border-color var(--mot-anim-mid) ease;
+}
+
+.mot-answer-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), transparent 30%);
+  pointer-events: none;
+}
+
+.mot-answer-band::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -10px;
+  height: 26px;
+  background: radial-gradient(circle, rgba(73,216,255,0.10), transparent 70%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.mot-answer-band__cell {
+  position: relative;
+  min-width: 0;
+  min-height: var(--mot-answer-cell-min-height);
+  padding: 18px 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: none;
+  border-radius: 18px;
+  font-size: var(--mot-answer-cell-font-size);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #f4fbff;
+  text-shadow: none;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(26,43,72,0.96), rgba(15,24,43,0.98) 58%, rgba(10,17,31,1));
+  border: 1px solid rgba(104,156,198,0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -1px 0 rgba(0,0,0,0.20),
+    0 12px 24px rgba(0,0,0,0.18);
+  transition:
+    opacity var(--mot-anim-mid) ease,
+    background var(--mot-anim-mid) ease,
+    color var(--mot-anim-mid) ease,
+    transform var(--mot-anim-fast) ease,
+    box-shadow var(--mot-anim-mid) ease,
+    border-color var(--mot-anim-mid) ease,
+    filter var(--mot-anim-mid) ease;
+}
+
+.mot-answer-band__cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), transparent 24%),
+    linear-gradient(135deg, rgba(255,255,255,0.04), transparent 40%);
+  pointer-events: none;
+}
+
+.mot-answer-band__cell::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(73,216,255,0.04),
+    rgba(255,255,255,0.18),
+    rgba(73,216,255,0.04)
+  );
+  opacity: 0.72;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.mot-answer-band__cell:hover {
+  transform: translateY(-3px);
+  border-color: rgba(138,196,234,0.20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 16px 28px rgba(0,0,0,0.22);
+  filter: none;
+}
+
+.mot-answer-band__cell:last-child { border-right: none; }
+
+.mot-answer-band--hide-borders .mot-answer-band__cell { border-right-color: transparent; }
+
+.mot-answer-band__cell--hidden {
+  opacity: 0.18;
+  color: transparent;
+  text-shadow: none;
+  filter: saturate(0.72);
+}
+
+.mot-answer-band__cell--correct {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(180,255,220,0.16), transparent 34%),
+    linear-gradient(180deg, rgba(52,156,109,0.98), rgba(25,88,61,1) 58%, rgba(13,56,38,1));
+  color: #effff7;
+  border-color: rgba(89,243,178,0.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(89,243,178,0.20),
+    inset 0 0 26px rgba(89,243,178,0.10),
+    0 0 30px rgba(89,243,178,0.16);
+}
+
+.mot-answer-band__cell--wrong {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,205,215,0.12), transparent 34%),
+    linear-gradient(180deg, rgba(146,48,71,0.98), rgba(88,25,42,1) 58%, rgba(54,16,26,1));
+  color: #fff3f6;
+  border-color: rgba(255,95,122,0.34);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,95,122,0.18),
+    inset 0 0 24px rgba(255,95,122,0.08),
+    0 0 26px rgba(255,95,122,0.14);
+}
+
+.mot-answer-band__cell--perfect {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,245,200,0.18), transparent 36%),
+    linear-gradient(180deg, rgba(168,128,34,0.98), rgba(110,79,16,1) 56%, rgba(70,49,10,1));
+  color: #fff9eb;
+  border-color: rgba(255,215,106,0.40);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,215,106,0.22),
+    inset 0 0 28px rgba(255,215,106,0.10),
+    0 0 34px rgba(255,215,106,0.18);
+}
+
+
+    .mot-controls-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      width: min(100%, 1500px);
+      margin: 4px auto 0;
+      gap: 18px;
+      align-items: center;
+      min-height: var(--mot-controls-min-height);
+      flex-shrink: 0;
+    }
+
+    .mot-bonuses {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      min-height: 48px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(10,19,34,0.82), rgba(7,14,25,0.88));
+      border: 1px solid rgba(91,136,174,0.10);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.03),
+        0 10px 18px rgba(0,0,0,0.12);
+    }
+    .mot-energy {
+      min-width: 240px;
+      display: grid;
+      gap: 6px;
+      align-self: center;
+    }
+    .mot-energy__meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--mot-muted);
+    }
+    .mot-energy__bar {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .mot-energy__fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(56,189,248,0.75), rgba(34,197,94,0.75));
+      transition: width var(--mot-anim-mid) ease;
+    }
+
+    .mot-btn {
+      appearance: none;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      font-family: var(--mot-font-button);
+      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      color: var(--mot-text);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform var(--mot-anim-fast) ease, opacity var(--mot-anim-fast) ease, border-color var(--mot-anim-fast) ease, box-shadow var(--mot-anim-fast) ease;
+      min-height: var(--mot-btn-min-height);
+    }
+    .mot-btn:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(255,255,255,0.22); }
+    .mot-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .mot-btn--stop {
+      min-width: 180px;
+      padding-inline: 24px;
+      background:
+        linear-gradient(180deg, rgba(96,31,45,0.94), rgba(66,17,28,0.98));
+      border-color: rgba(173,76,98,0.34);
+      color: #fff8fa;
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-shadow: none;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        inset 0 -1px 0 rgba(33,6,13,0.36),
+        0 14px 26px rgba(45,7,16,0.22);
+    }
+    .mot-btn--stop::before {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 13px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.12), transparent 38%),
+        linear-gradient(135deg, rgba(255,170,184,0.05), transparent 42%, transparent 62%, rgba(255,255,255,0.03));
+      pointer-events: none;
+      z-index: -1;
+    }
+    .mot-btn--stop::after {
+      content: "";
+      position: absolute;
+      top: -20%;
+      bottom: -20%;
+      width: 44%;
+      left: -58%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+      transform: skewX(-18deg);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .mot-btn--stop:disabled {
+      opacity: 0.42;
+      border-color: rgba(173,76,98,0.20);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        inset 0 -1px 0 rgba(79,10,23,0.24),
+        0 8px 16px rgba(0,0,0,0.14);
+    }
+    .mot-btn--stop:not(:disabled) {
+      border-color: rgba(186,88,110,0.42);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.07),
+        inset 0 -1px 0 rgba(79,10,23,0.34),
+        0 14px 28px rgba(45,7,16,0.24);
+      animation: none;
+    }
+    .mot-btn--stop:not(:disabled)::after {
+      opacity: 0.55;
+      animation: motStopSweep 4.2s linear infinite;
+    }
+    .mot-btn--stop:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: rgba(196,100,121,0.50);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(79,10,23,0.38),
+        0 16px 30px rgba(45,7,16,0.28);
+    }
+    .mot-btn--stop:active:not(:disabled) {
+      transform: translateY(0) scale(0.99);
+    }
+    @keyframes motStopSweep {
+      0% {
+        left: -58%;
+      }
+      100% {
+        left: 114%;
+      }
+    }
+    .mot-btn--bonus { font-size: 14px; }
+    .mot-btn--bonus {
+      border-radius: 999px;
+      padding: 10px 16px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
+        linear-gradient(180deg, rgba(14,25,42,0.94), rgba(8,16,28,0.98));
+      border-color: rgba(99,149,190,0.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.03),
+        0 8px 16px rgba(0,0,0,0.10);
+      color: #d2e1f0;
+    }
+    .mot-btn--bonus-ready {
+      border-color: rgba(56,189,248,0.44);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 0 0 1px rgba(56,189,248,0.12),
+        0 0 16px rgba(56,189,248,0.10);
+    }
+    .mot-btn--freeze-active {
+      border-color: rgba(56,189,248,0.8);
+      box-shadow: 0 0 0 4px rgba(56,189,248,0.20), 0 0 20px rgba(56,189,248,0.20);
+      background: linear-gradient(180deg, rgba(56,189,248,0.24), rgba(2,132,199,0.16));
+    }
+
+    .mot-feedback {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 320px) auto;
+      width: min(100%, 1500px);
+      margin: 0 auto;
+      gap: 14px;
+      align-items: center;
+      padding: 2px 0 0;
+      min-height: var(--mot-feedback-height);
+      height: var(--mot-feedback-height);
+      max-height: var(--mot-feedback-height);
+      flex-shrink: 0;
+    }
+    .mot-banner {
+      font-family: var(--mot-font-feedback);
+      height: var(--mot-feedback-height);
+      min-height: var(--mot-feedback-height);
+      max-height: var(--mot-feedback-height);
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(87,148,204,0.10);
+      background:
+        linear-gradient(180deg, rgba(9,21,36,0.86), rgba(8,16,28,0.92));
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 14px;
+      transition: opacity var(--mot-anim-mid) ease, transform var(--mot-anim-mid) ease;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .mot-banner--correct { color: #bbf7d0; background: rgba(22,163,74,0.18); border-color: rgba(34,197,94,0.24); }
+    .mot-banner--wrong { color: #fecaca; background: rgba(220,38,38,0.18); border-color: rgba(239,68,68,0.24); }
+    .mot-banner--info { color: #bae6fd; background: rgba(2,132,199,0.14); border-color: rgba(56,189,248,0.22); }
+    .mot-banner--perfect { color: #fde68a; background: rgba(250,204,21,0.16); border-color: rgba(250,204,21,0.28); }
+
+    .mot-inline-toast {
+      height: var(--mot-feedback-height);
+      min-height: var(--mot-feedback-height);
+      max-height: var(--mot-feedback-height);
+      padding: 10px 14px;
+      border-radius: 16px;
+      display: grid;
+      align-content: center;
+      border: 1px solid rgba(87,148,204,0.12);
+      background:
+        linear-gradient(180deg, rgba(9,21,37,0.80), rgba(8,16,28,0.88));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.03),
+        0 10px 16px rgba(0,0,0,0.10);
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        transform var(--mot-anim-mid) ease,
+        border-color var(--mot-anim-mid) ease,
+        background var(--mot-anim-mid) ease;
+      pointer-events: none;
+    }
+    .mot-inline-toast--visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .mot-inline-toast--achievement {
+      color: #fff4c2;
+      border-color: rgba(250,204,21,0.26);
+      background: linear-gradient(180deg, rgba(92,68,16,0.42), rgba(50,38,10,0.58));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 0 18px rgba(250,204,21,0.08);
+    }
+    .mot-inline-toast--perfect {
+      color: #dff7ff;
+      border-color: rgba(56,189,248,0.26);
+      background: linear-gradient(180deg, rgba(16,72,96,0.42), rgba(8,38,55,0.58));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 0 18px rgba(56,189,248,0.08);
+    }
+    .mot-inline-toast__title {
+      font-family: var(--mot-font-hud-label);
+      font-size: 12px;
+      color: var(--mot-muted);
+      margin-bottom: 2px;
+      line-height: 1;
+    }
+    .mot-inline-toast__text {
+      font-family: var(--mot-font-feedback);
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mot-timer { min-width: 168px; height: var(--mot-feedback-height); display: flex; align-items: center; justify-content: flex-end; }
+    .mot-timer__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: var(--mot-timer-pill-height);
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #e0f2fe;
+      background: rgba(56,189,248,0.16);
+      border: 1px solid rgba(56,189,248,0.34);
+      box-shadow: 0 0 0 0 rgba(56,189,248,0.3);
+      opacity: 0;
+      transform: scale(0.96);
+      transition: opacity var(--mot-anim-fast) ease, transform var(--mot-anim-fast) ease;
+      pointer-events: none;
+    }
+    .mot-timer__pill--visible {
+      opacity: 1;
+      transform: scale(1);
+      animation: motFreezePulse 1s ease-in-out infinite;
+    }
+    @keyframes motFreezePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(56,189,248,0.22); }
+      50% { box-shadow: 0 0 0 8px rgba(56,189,248,0.06); }
+    }
+
+    .mot-perfect-burst {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%) scale(0.8);
+      font-size: clamp(28px, 6vw, 56px);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: #fde68a;
+      text-shadow: 0 0 24px rgba(250,204,21,0.28);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .mot-perfect-burst--show { animation: motPerfectBurst 800ms ease forwards; }
+    @keyframes motPerfectBurst {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.72); }
+      12% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+      75% { opacity: 1; transform: translate(-50%, -52%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -58%) scale(0.95); }
+    }
+
+    .mot-shake { animation: motShake 420ms ease; }
+    @keyframes motShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(7px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(4px); }
+    }
+
+    .mot-intro {
+      position: absolute;
+      inset: 0;
+      z-index: 35;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(180deg, var(--mot-intro-overlay-top), var(--mot-intro-overlay-bottom)),
+        radial-gradient(circle at 50% 28%, rgba(73,216,255,0.10), transparent 28%);
+      backdrop-filter: blur(10px);
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        visibility 0s linear var(--mot-anim-mid);
+    }
+    .mot-intro--visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        visibility 0s linear 0s;
+    }
+    .mot-intro__card {
+      position: relative;
+      width: min(100%, 860px);
+      padding: 34px 34px 30px;
+      border-radius: 28px;
+      overflow: hidden;
+      text-align: center;
+      background:
+        linear-gradient(180deg, var(--mot-intro-card-top), var(--mot-intro-card-bottom)),
+        radial-gradient(circle at 50% 0%, rgba(73,216,255,0.06), transparent 54%);
+      border: 1px solid var(--mot-intro-card-border);
+      box-shadow:
+        0 28px 70px rgba(0,0,0,0.34),
+        0 0 0 1px rgba(73,216,255,0.05),
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        inset 0 -1px 0 rgba(73,216,255,0.03);
+      opacity: 0;
+      transform: translateY(28px) scale(0.985);
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        transform var(--mot-anim-slow) cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .mot-intro--visible .mot-intro__card {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .mot-intro__card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent 28%),
+        linear-gradient(135deg, rgba(73,216,255,0.04), transparent 38%, transparent 68%, rgba(89,243,178,0.03));
+      pointer-events: none;
+    }
+    .mot-intro__eyebrow {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 14px;
+      color: #91a9c4;
+      font-family: var(--mot-font-hud-label);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .mot-intro__title {
+      position: relative;
+      z-index: 1;
+      font-family: var(--mot-font-question);
+      font-size: clamp(34px, 5vw, 56px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+      color: #f5fbff;
+    }
+    .mot-intro__subtitle {
+      position: relative;
+      z-index: 1;
+      max-width: 56ch;
+      margin: 0 auto 26px;
+      color: #9bb0c7;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    .mot-intro__stats {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .mot-intro__stat {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)),
+        linear-gradient(180deg, rgba(15,27,47,0.94), rgba(8,15,28,0.96));
+      border: 1px solid rgba(97,145,183,0.10);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.03),
+        0 12px 22px rgba(0,0,0,0.14);
+    }
+    .mot-intro__stat-label {
+      color: #8ea6c1;
+      font-family: var(--mot-font-hud-label);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .mot-intro__stat-value {
+      color: #f4fbff;
+      font-family: var(--mot-font-hud-value);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+    .mot-intro__hint {
+      position: relative;
+      z-index: 1;
+      padding: 16px 18px;
+      border-radius: 18px 18px 0 0;
+      background:
+        linear-gradient(180deg, rgba(8,22,38,0.84), rgba(7,16,28,0.90));
+      border: 1px solid rgba(90,145,189,0.10);
+      border-bottom: none;
+      color: #c5d8eb;
+      font-size: 15px;
+      line-height: 1.55;
+      text-align: left;
+    }
+    .mot-intro__modes {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 0 18px 18px;
+      background:
+        linear-gradient(180deg, rgba(8,22,38,0.84), rgba(7,16,28,0.90));
+      border-left: 1px solid rgba(90,145,189,0.10);
+      border-right: 1px solid rgba(90,145,189,0.10);
+      border-bottom: 1px solid rgba(90,145,189,0.10);
+    }
+    .mot-intro__mode {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 12px 11px;
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, rgba(16,28,47,0.78), rgba(9,16,29,0.90));
+      border: 1px solid rgba(104,156,198,0.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .mot-intro__mode-tag {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 74px;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-family: var(--mot-font-hud-label);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(8,16,31,0.78);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .mot-intro__mode-tag--speed {
+      color: #ffe27a;
+      border-color: rgba(255,215,106,0.28);
+    }
+    .mot-intro__mode-tag--safe {
+      color: #8fe9ff;
+      border-color: rgba(73,216,255,0.28);
+    }
+    .mot-intro__mode-tag--double {
+      color: #86ffcb;
+      border-color: rgba(89,243,178,0.28);
+    }
+    .mot-intro__mode-tag--boss {
+      color: #ff9bb0;
+      border-color: rgba(255,95,122,0.30);
+    }
+    .mot-intro__mode-text {
+      color: #c6d9ea;
+      font-size: 14px;
+      line-height: 1.45;
+      text-align: left;
+    }
+    .mot-intro__footer {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      border-radius: 0 0 20px 20px;
+      border: 1px solid rgba(90,145,189,0.10);
+      background:
+        linear-gradient(180deg, rgba(9,18,31,0.88), rgba(7,14,25,0.94)),
+        radial-gradient(circle at 100% 50%, rgba(73,216,255,0.04), transparent 26%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.02),
+        0 14px 26px rgba(0,0,0,0.14);
+    }
+    .mot-intro__actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 18px 20px;
+    }
+    .mot-intro__meta {
+      flex: 1 1 320px;
+      color: #88a0bb;
+      font-family: var(--mot-font-hud-label);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .mot-btn--start {
+      min-width: 260px;
+      padding-inline: 28px;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(77,173,225,0.96), rgba(26,111,154,0.98));
+      border-color: rgba(137,215,255,0.42);
+      color: #02121f;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.24),
+        inset 0 -1px 0 rgba(10,46,68,0.26),
+        0 18px 32px rgba(13,65,94,0.28);
+    }
+    .mot-btn--start:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: rgba(176,230,255,0.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.24),
+        inset 0 -1px 0 rgba(10,46,68,0.30),
+        0 22px 38px rgba(13,65,94,0.34);
+    }
+
+    .mot-final {
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(180deg, rgba(2,6,18,0.72), rgba(2,6,18,0.84)),
+        radial-gradient(circle at 50% 22%, rgba(73,216,255,0.10), transparent 24%);
+      backdrop-filter: blur(10px);
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        visibility 0s linear var(--mot-anim-mid);
+    }
+    .mot-final--visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        visibility 0s linear 0s;
+    }
+    .mot-final__card {
+      width: min(100%, 820px);
+      padding: 28px;
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(12,20,35,0.97), rgba(7,12,22,0.98)),
+        radial-gradient(circle at 50% 0%, rgba(73,216,255,0.07), transparent 56%);
+      border: 1px solid rgba(114,166,207,0.18);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,0.38),
+        0 0 0 1px rgba(73,216,255,0.04),
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        inset 0 -1px 0 rgba(73,216,255,0.03);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(28px) scale(0.982);
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        transform var(--mot-anim-slow) cubic-bezier(0.22, 1, 0.36, 1),
+        border-color var(--mot-anim-mid) ease,
+        box-shadow var(--mot-anim-mid) ease;
+    }
+    .mot-final--visible .mot-final__card {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .mot-final__card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), transparent 22%),
+        linear-gradient(135deg, rgba(73,216,255,0.04), transparent 34%, transparent 68%, rgba(89,243,178,0.03));
+      pointer-events: none;
+    }
+    .mot-final__card--win {
+      border-color: rgba(89,243,178,0.22);
+      box-shadow:
+        0 34px 88px rgba(0,0,0,0.40),
+        0 0 0 1px rgba(89,243,178,0.05),
+        0 0 42px rgba(89,243,178,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .mot-final__card--lose {
+      border-color: rgba(255,95,122,0.20);
+      box-shadow:
+        0 34px 88px rgba(0,0,0,0.40),
+        0 0 0 1px rgba(255,95,122,0.05),
+        0 0 34px rgba(255,95,122,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .mot-final__card > * {
+      position: relative;
+      z-index: 1;
+    }
+    .mot-final__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 16px;
+      margin-bottom: 14px;
+      border-radius: 999px;
+      background: rgba(10,25,42,0.82);
+      border: 1px solid rgba(118,174,217,0.18);
+      color: #93b8d7;
+      font-family: var(--mot-font-hud-label);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .mot-final__title {
+      font-family: var(--mot-font-question);
+      font-size: clamp(30px, 4.2vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+      color: #f6fbff;
+    }
+    .mot-final__subtitle {
+      font-family: var(--mot-font-ui);
+      color: #99aec8;
+      margin: 0 auto 20px;
+      max-width: 46ch;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    .mot-final__hero {
+      margin: 0 auto 18px;
+      padding: 22px 24px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(12,24,40,0.92), rgba(7,15,27,0.96)),
+        radial-gradient(circle at 50% 0%, rgba(73,216,255,0.07), transparent 58%);
+      border: 1px solid rgba(97,149,191,0.14);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 16px 34px rgba(0,0,0,0.18);
+    }
+    .mot-final__score-label {
+      margin-bottom: 8px;
+      color: #8ea7c2;
+      font-family: var(--mot-font-hud-label);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .mot-final__score {
+      font-family: var(--mot-font-hud-value);
+      font-size: clamp(44px, 8vw, 78px);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      color: #f8fdff;
+      text-shadow: 0 0 24px rgba(73,216,255,0.10);
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+    .mot-final__summary {
+      margin: 12px auto 0;
+      max-width: 50ch;
+      color: #afc4db;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .mot-final__progress-block {
+      margin: 0 0 20px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(8,18,31,0.78);
+      border: 1px solid rgba(90,145,189,0.10);
+    }
+    .mot-final__progress-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 10px;
+      color: #8fa9c4;
+      font-family: var(--mot-font-hud-label);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .mot-final__progress-bar {
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(26,37,58,0.96), rgba(15,23,40,0.98));
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      overflow: hidden;
+    }
+    .mot-final__progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(73,216,255,0.68), rgba(89,243,178,0.72));
+      box-shadow: 0 0 24px rgba(73,216,255,0.16);
+      transition: width var(--mot-anim-slow) ease;
+    }
+    .mot-final__stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0 0 22px;
+    }
+    .mot-final__stat {
+      padding: 16px 12px 14px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.01)),
+        linear-gradient(180deg, rgba(15,27,47,0.90), rgba(8,15,28,0.94));
+      border: 1px solid rgba(97,145,183,0.10);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.03),
+        0 12px 24px rgba(0,0,0,0.14);
+    }
+    .mot-final__stat-value {
+      font-family: var(--mot-font-hud-value);
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 5px;
+      color: #f5fbff;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+    .mot-final__stat-label {
+      font-family: var(--mot-font-hud-label);
+      color: #8ea6c1;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .mot-final__actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .mot-banner {
+      transition:
+        opacity var(--mot-anim-mid) ease,
+        box-shadow var(--mot-anim-mid) ease,
+        border-color var(--mot-anim-mid) ease;
+    }
+    .mot-btn--final-primary {
+      min-width: 220px;
+      background:
+        linear-gradient(180deg, rgba(77,173,225,0.96), rgba(26,111,154,0.98));
+      border-color: rgba(137,215,255,0.40);
+      color: #02121f;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.24),
+        inset 0 -1px 0 rgba(10,46,68,0.26),
+        0 16px 30px rgba(13,65,94,0.24);
+    }
+    .mot-btn--final-secondary {
+      min-width: 180px;
+      background:
+        linear-gradient(180deg, rgba(17,29,49,0.94), rgba(10,18,31,0.98));
+      border-color: rgba(96,140,180,0.18);
+      color: #cce0f1;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 14px 28px rgba(0,0,0,0.18);
+    }
+
+    .mot-confetti-layer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .mot-confetti {
+      position: absolute;
+      top: -20px;
+      width: 10px;
+      height: 18px;
+      border-radius: 2px;
+      opacity: 0.9;
+      animation: motConfettiFall linear forwards;
+    }
+    @keyframes motConfettiFall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .mot-hud { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .mot-intro__stats { grid-template-columns: 1fr; }
+      .mot-intro__modes { grid-template-columns: 1fr; }
+      .mot-final__stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-height: 920px) {
+      :root {
+        --mot-shell-gap: 10px;
+        --mot-shell-padding: 12px;
+        --mot-track-height: 36px;
+        --mot-main-gap: 12px;
+        --mot-main-padding: 14px;
+        --mot-question-height: 108px;
+        --mot-question-min-height: 96px;
+        --mot-rail-frame-height: 68px;
+        --mot-answer-wrap-bottom: 10px;
+        --mot-answer-band-min-height: 118px;
+        --mot-answer-cell-min-height: 92px;
+        --mot-answer-cell-font-size: clamp(18px, 1.9vw, 26px);
+        --mot-controls-min-height: 48px;
+        --mot-btn-min-height: 44px;
+        --mot-feedback-height: 50px;
+        --mot-timer-pill-height: 36px;
+      }
+
+      .mot-hud {
+        gap: 8px;
+        padding: 10px;
+      }
+
+      .mot-stat {
+        padding: 8px 10px 10px;
+      }
+
+      .mot-progress {
+        padding: 12px 14px 14px;
+      }
+
+      .mot-progress__header {
+        margin-bottom: 8px;
+      }
+
+      .mot-question {
+        padding: 16px 82px 16px 20px;
+      }
+
+      .mot-question--boss::after,
+      .mot-question--speed::after,
+      .mot-question--safe::after,
+      .mot-question--double::after {
+        top: 12px;
+        right: 12px;
+        padding: 6px 10px;
+      }
+
+      .mot-answer-band {
+        gap: 12px;
+        padding: 8px;
+      }
+
+      .mot-answer-band__cell {
+        padding: 14px 16px 18px;
+      }
+
+      .mot-controls-row {
+        margin-top: 2px;
+      }
+
+      .mot-energy {
+        min-width: 200px;
+      }
+
+      .mot-banner {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+    }
+    @media (max-height: 820px) {
+      :root {
+        --mot-shell-gap: 8px;
+        --mot-shell-padding: 10px;
+        --mot-track-height: 32px;
+        --mot-main-gap: 10px;
+        --mot-main-padding: 12px;
+        --mot-question-height: 96px;
+        --mot-question-min-height: 84px;
+        --mot-rail-frame-height: 60px;
+        --mot-answer-wrap-bottom: 8px;
+        --mot-answer-band-min-height: 102px;
+        --mot-answer-cell-min-height: 82px;
+        --mot-answer-cell-font-size: clamp(16px, 1.6vw, 22px);
+        --mot-controls-min-height: 44px;
+        --mot-btn-min-height: 40px;
+        --mot-feedback-height: 46px;
+        --mot-timer-pill-height: 32px;
+      }
+
+      .mot-progress__meta {
+        font-size: 12px;
+      }
+
+      .mot-question {
+        padding: 14px 74px 14px 18px;
+      }
+
+      .mot-question__inner {
+        -webkit-line-clamp: 2;
+      }
+
+      .mot-answer-band {
+        gap: 10px;
+      }
+
+      .mot-answer-band__cell {
+        padding: 12px 14px 16px;
+      }
+
+      .mot-btn--stop {
+        min-width: 156px;
+        font-size: 16px;
+      }
+
+      .mot-banner {
+        font-size: 13px;
+      }
+
+      .mot-feedback {
+        grid-template-columns: minmax(0, 1fr) minmax(180px, 240px) auto;
+      }
+
+      .mot-inline-toast {
+        padding: 8px 10px;
+      }
+
+      .mot-inline-toast__text {
+        font-size: 13px;
+      }
+    }
+    @media (max-width: 820px) {
+      .mot-shell { padding: 12px; gap: 12px; }
+      .mot-hud { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .mot-intro {
+        padding: 16px;
+      }
+      .mot-intro__card {
+        padding: 26px 22px 22px;
+      }
+      .mot-intro__actions {
+        align-items: stretch;
+        padding: 16px;
+      }
+      .mot-intro__meta {
+        text-align: center;
+      }
+      .mot-btn--start {
+        width: 100%;
+      }
+      .mot-controls-row { grid-template-columns: 1fr; }
+      .mot-bonuses { padding: 10px 12px; }
+      .mot-feedback {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 102px;
+        max-height: none;
+      }
+      .mot-banner { white-space: normal; height: auto; min-height: 58px; max-height: none; }
+      .mot-inline-toast {
+        width: 100%;
+        height: auto;
+        min-height: 54px;
+        max-height: none;
+      }
+      .mot-inline-toast__text {
+        white-space: normal;
+      }
+      .mot-timer { justify-content: flex-start; height: auto; }
+      .mot-final__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      .mot-hud { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mot-question { height: 108px; max-height: 108px; }
+      .mot-answer-band__cell { padding: 10px 8px; font-size: 13px; }
+      .mot-btn--stop { width: 100%; }
+      .mot-energy { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="moment-of-truth-root"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const DEFAULT_CONFIG = {
+        content: { title: 'Момент истины' },
+        theme: {
+          colors: {
+            bg: '#06111f',
+            bgDeep: '#030814',
+            panel: 'rgba(10, 19, 35, 0.74)',
+            panel2: 'rgba(14, 27, 49, 0.9)',
+            panelSolid: '#0f1b31',
+            text: '#f5fbff',
+            muted: '#90a6c3',
+            accent: '#59f3b2',
+            accent2: '#49d8ff',
+            accent3: '#ffd76a',
+            danger: '#ff5f7a',
+            warning: '#ffb84d',
+            correct: '#39d98a',
+            wrong: '#ff5f7a',
+            border: 'rgba(125, 211, 252, 0.16)',
+            grid: 'rgba(73, 216, 255, 0.05)'
+          },
+          scene: {
+            top: '#0b1d33',
+            mid: '#081426',
+            bottom: '#050c18',
+            glow1: 'rgba(22,126,173,0.16)',
+            glow2: 'rgba(21,74,112,0.10)',
+            aurora1: 'rgba(63,143,198,0.14)',
+            aurora2: 'rgba(63,143,198,0.10)',
+            aurora3: 'rgba(30,126,148,0.10)',
+            gridLine: 'rgba(73,216,255,0.035)'
+          },
+          panels: {
+            top: 'rgba(10,19,34,0.90)',
+            bottom: 'rgba(5,10,20,0.94)',
+            glow: 'rgba(92,154,196,0.04)',
+            border: 'rgba(96,140,180,0.10)',
+            introOverlayTop: 'rgba(2,6,16,0.62)',
+            introOverlayBottom: 'rgba(2,6,16,0.78)',
+            introCardTop: 'rgba(10,19,34,0.96)',
+            introCardBottom: 'rgba(6,11,21,0.98)',
+            introCardBorder: 'rgba(122,176,219,0.18)'
+          },
+          effects: {
+            shadow: '0 18px 50px rgba(0, 0, 0, 0.34)',
+            radius: '18px'
+          },
+          fonts: {
+            body: '"Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif',
+            display: '"Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif',
+            tech: '"Bahnschrift", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif',
+            ui: 'var(--mot-font-body)',
+            hudLabel: 'var(--mot-font-tech)',
+            hudValue: 'var(--mot-font-display)',
+            question: 'var(--mot-font-display)',
+            button: 'var(--mot-font-tech)',
+            feedback: 'var(--mot-font-ui)',
+            title: 'var(--mot-font-question)'
+          },
+          sizes: {
+            answerFontSize: 'clamp(14px, 2vw, 18px)',
+            questionFontSize: 'clamp(18px, 2.2vw, 28px)',
+            hudFontSize: 'clamp(12px, 1.3vw, 14px)',
+            answerCellFontSize: 'clamp(20px, 2.3vw, 30px)'
+          }
+        },
+        gameplay: {
+          lives: 3,
+          stepsToFinish: 5,
+          continueMode: 'auto',
+          maxAnswerLength: 40,
+          safeRoundNoLifeLoss: true,
+          lastChanceLivesThreshold: 1,
+          resultDelayMs: 1700,
+          scoreCountDurationMs: 1200
+        },
+        movement: {
+          shapeType: 'horizontal',
+          movementType: 'pingpong',
+          minStopDelayMs: 800,
+          defaultSpeed: 300,
+          indicatorType: 'runner'
+        },
+        progress: {
+          playerToken: '',
+          playerTokenImage: '',
+          playerLabel: 'Игрок',
+          finishIcon: '',
+          finishLabel: 'Финиш'
+        },
+        ui: {
+          lifeDisplay: 'hearts',
+          showAccuracy: true,
+          showCombo: true,
+          showSegmentBorders: false,
+          unifiedRail: true,
+          answerStyle: 'band',
+          lockIndicatorOnWrong: true,
+          autoNextDelayMs: 1700
+        },
+        scoring: {
+          baseCorrect: 100,
+          comboStep: 50,
+          comboCap: 5,
+          perfectBonus: 100,
+          speedRoundMultiplier: 1.5,
+          bossRoundMultiplier: 2,
+          doubleStepBonus: 50
+        },
+        bonuses: {
+          freezeDurationMs: 10000,
+          energyEnabled: true,
+          energyMax: 100,
+          freezeCost: 100,
+          fiftyCost: 60,
+          energyGainCorrect: 30,
+          energyGainPerfect: 20,
+          energyLossWrong: 20
+        },
+        perfect: {
+          enabled: true,
+          thresholdRatio: 0.12,
+          text: 'ИДЕАЛ!'
+        },
+        achievements: {
+          enabled: true,
+          list: [
+            { id: 'combo3', check: 'combo3', title: 'Ачивка', text: 'Серия 3 ответа подряд' },
+            { id: 'combo5', check: 'combo5', title: 'Ачивка', text: 'Серия 5 ответов подряд' },
+            { id: 'perfect3', check: 'perfect3', title: 'Снайпер', text: '3 идеальных попадания подряд' },
+            { id: 'survivor', check: 'survivor', title: 'Спасение', text: 'Победа с одной жизнью' },
+            { id: 'cool', check: 'cool', title: 'Хладнокровие', text: 'Победа без Стоп-кадра' }
+          ]
+        },
+        audio: {
+          enabled: true,
+          volume: 0.05,
+          scoreTickIntervalMs: 40
+        },
+        messages: {
+          correct: ['Точное решение.', 'Ответ принят.', 'Отличный темп.'],
+          wrong: ['Мимо цели.', 'Не тот сектор.', 'Попробуй другой ритм.'],
+          combo: {
+            2: 'Серия x2. Темп набран.',
+            3: 'Серия x3. Отличный ритм.',
+            5: 'Серия x5. Идеальный заход.'
+          },
+          perfect: ['Идеальное попадание.', 'Чистый центр.', 'Безупречно.'],
+          lastChance: 'Последняя жизнь. Держи темп.'
+        },
+        debug: false
+      };
+
+      const DEFAULT_QUESTIONS = [
+        {
+          id: 'question_1',
+          question: 'Какое число является простым?',
+          answers: ['9', '11', '15'],
+          correct_index: 1,
+          speed: 340,
+          mode: 'normal'
+        },
+        {
+          id: 'question_2',
+          question: 'Какая планета известна как Красная планета?',
+          answers: ['Венера', 'Марс', 'Сатурн'],
+          correct_index: 1,
+          speed: 360,
+          mode: 'speed'
+        },
+        {
+          id: 'question_3',
+          question: 'Сколько будет 6 × 7?',
+          answers: ['42', '36', '48'],
+          correct_index: 0,
+          speed: 300,
+          mode: 'safe'
+        },
+        {
+          id: 'question_4',
+          question: 'Какой океан самый большой?',
+          answers: ['Атлантический', 'Индийский', 'Тихий'],
+          correct_index: 2,
+          speed: 320,
+          mode: 'double_step'
+        },
+        {
+          id: 'question_5',
+          question: 'Какой газ растения поглощают из воздуха?',
+          answers: ['Кислород', 'Углекислый газ', 'Азот'],
+          correct_index: 1,
+          speed: 390,
+          mode: 'boss'
+        }
+      ];
+
+      const THEME_VAR_MAP = {
+        colors: {
+          bg: '--mot-bg',
+          bgDeep: '--mot-bg-deep',
+          panel: '--mot-panel',
+          panel2: '--mot-panel-2',
+          panelSolid: '--mot-panel-solid',
+          text: '--mot-text',
+          muted: '--mot-muted',
+          accent: '--mot-accent',
+          accent2: '--mot-accent-2',
+          accent3: '--mot-accent-3',
+          danger: '--mot-danger',
+          warning: '--mot-warning',
+          correct: '--mot-correct',
+          wrong: '--mot-wrong',
+          border: '--mot-border',
+          grid: '--mot-grid'
+        },
+        scene: {
+          top: '--mot-scene-top',
+          mid: '--mot-scene-mid',
+          bottom: '--mot-scene-bottom',
+          glow1: '--mot-scene-glow-1',
+          glow2: '--mot-scene-glow-2',
+          aurora1: '--mot-scene-aurora-1',
+          aurora2: '--mot-scene-aurora-2',
+          aurora3: '--mot-scene-aurora-3',
+          gridLine: '--mot-grid-line'
+        },
+        panels: {
+          top: '--mot-panel-top',
+          bottom: '--mot-panel-bottom',
+          glow: '--mot-panel-glow',
+          border: '--mot-panel-border',
+          introOverlayTop: '--mot-intro-overlay-top',
+          introOverlayBottom: '--mot-intro-overlay-bottom',
+          introCardTop: '--mot-intro-card-top',
+          introCardBottom: '--mot-intro-card-bottom',
+          introCardBorder: '--mot-intro-card-border'
+        },
+        effects: {
+          shadow: '--mot-shadow',
+          radius: '--mot-radius'
+        },
+        fonts: {
+          body: '--mot-font-body',
+          display: '--mot-font-display',
+          tech: '--mot-font-tech',
+          ui: '--mot-font-ui',
+          hudLabel: '--mot-font-hud-label',
+          hudValue: '--mot-font-hud-value',
+          question: '--mot-font-question',
+          button: '--mot-font-button',
+          feedback: '--mot-font-feedback',
+          title: '--mot-title-font'
+        },
+        sizes: {
+          answerFontSize: '--mot-answer-font-size',
+          questionFontSize: '--mot-question-font-size',
+          hudFontSize: '--mot-hud-font-size',
+          answerCellFontSize: '--mot-answer-cell-font-size'
+        }
+      };
+
+      function collectThemeVarNames(map, output = []) {
+        Object.values(map).forEach((value) => {
+          if (typeof value === 'string') output.push(value);
+          else if (value && typeof value === 'object') collectThemeVarNames(value, output);
+        });
+        return output;
+      }
+
+      function mapThemeToCssVars(themeSection, map, output = {}) {
+        if (!themeSection || !map) return output;
+        Object.keys(map).forEach((key) => {
+          const mapValue = map[key];
+          const themeValue = themeSection[key];
+          if (typeof mapValue === 'string') {
+            if (themeValue !== undefined && themeValue !== null && themeValue !== '') output[mapValue] = String(themeValue);
+            return;
+          }
+          if (mapValue && typeof mapValue === 'object') mapThemeToCssVars(themeValue || {}, mapValue, output);
+        });
+        return output;
+      }
+
+      const THEME_VAR_NAMES = collectThemeVarNames(THEME_VAR_MAP);
+
+      function deepMerge(target, source) {
+        const output = Array.isArray(target) ? target.slice() : { ...target };
+        if (!source || typeof source !== 'object') return output;
+        Object.keys(source).forEach((key) => {
+          const value = source[key];
+          if (Array.isArray(value)) output[key] = value.slice();
+          else if (value && typeof value === 'object') {
+            output[key] = deepMerge(output[key] && typeof output[key] === 'object' ? output[key] : {}, value);
+          } else output[key] = value;
+        });
+        return output;
+      }
+      const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+      const percent = (value, total) => total ? Math.round((value / total) * 100) : 0;
+      const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      const truncateText = (text, maxLength) => typeof text !== 'string' ? '' : (text.length > maxLength ? text.slice(0, maxLength - 1) + '…' : text);
+
+      function validateQuestions(questions, maxAnswerLength) {
+        if (!Array.isArray(questions) || !questions.length) throw new Error('Questions array is empty.');
+        questions.forEach((q, index) => {
+          if (!q || typeof q !== 'object') throw new Error(`Question at index ${index} is invalid.`);
+          if (!Array.isArray(q.answers) || q.answers.length < 3 || q.answers.length > 5) throw new Error(`Question "${q.id || index}" must contain 3..5 answers.`);
+          if (typeof q.correct_index !== 'number' || q.correct_index < 0 || q.correct_index >= q.answers.length) throw new Error(`Question "${q.id || index}" has invalid correct_index.`);
+          q.answers.forEach((answer, answerIndex) => {
+            if (String(answer).length > maxAnswerLength) throw new Error(`Answer ${answerIndex} in "${q.id || index}" exceeds maxAnswerLength (${maxAnswerLength}).`);
+          });
+        });
+      }
+
+      function createAudioManager(configRef) {
+        let ctx = null;
+        let freezeLoopNodes = null;
+        let freezeLfoNodes = null;
+        let scoreTickTimer = null;
+
+        function ensureContext() {
+          if (!configRef.audio.enabled) return null;
+          if (!ctx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return null;
+            ctx = new AudioContextClass();
+          }
+          if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+          return ctx;
+        }
+
+        function playTone(options = {}) {
+          const audioCtx = ensureContext();
+          if (!audioCtx) return;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const now = audioCtx.currentTime;
+          const filter = audioCtx.createBiquadFilter();
+          const baseVolume = Number(configRef.audio.volume || 0.05);
+          const frequency = Number(options.freq || 440);
+          const endFrequency = Number(options.endFreq || frequency);
+          const duration = Math.max(Number(options.duration || 0.12), 0.03);
+          const attack = clamp(Number(options.attack ?? 0.008), 0.001, 0.08);
+          const releaseStart = clamp(Number(options.releaseStart ?? duration * 0.35), attack, duration);
+          const volume = clamp(baseVolume * Number(options.volumeMultiplier || 1), 0, 1);
+          osc.type = options.type || 'sine';
+          osc.frequency.setValueAtTime(frequency, now);
+          if (endFrequency !== frequency) osc.frequency.exponentialRampToValueAtTime(Math.max(endFrequency, 1), now + duration);
+          filter.type = options.filterType || 'lowpass';
+          filter.frequency.setValueAtTime(Number(options.filterFreq || 2200), now);
+          filter.Q.setValueAtTime(Number(options.filterQ || 0.0001), now);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0001), now + attack);
+          gain.gain.exponentialRampToValueAtTime(Math.max(volume * 0.58, 0.0001), now + releaseStart);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        }
+
+        function playSequence(tones = []) {
+          tones.forEach((tone) => {
+            const delay = Number(tone.delay || 0);
+            setTimeout(() => playTone(tone), delay);
+          });
+        }
+
+        function startFreezeLoop() {
+          const audioCtx = ensureContext();
+          if (!audioCtx || freezeLoopNodes) return;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const filter = audioCtx.createBiquadFilter();
+          const lfo = audioCtx.createOscillator();
+          const lfoGain = audioCtx.createGain();
+          const now = audioCtx.currentTime;
+          const baseVolume = clamp(Number(configRef.audio.volume || 0.05) * 0.12, 0, 0.05);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(330, now);
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(1400, now);
+          filter.Q.setValueAtTime(1.2, now);
+          lfo.type = 'sine';
+          lfo.frequency.setValueAtTime(2.2, now);
+          lfoGain.gain.setValueAtTime(0.015, now);
+          lfo.connect(lfoGain);
+          lfoGain.connect(gain.gain);
+          gain.gain.setValueAtTime(baseVolume, now);
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          lfo.start(now);
+          freezeLoopNodes = { osc, gain, filter };
+          freezeLfoNodes = { lfo, lfoGain };
+        }
+
+        function stopFreezeLoop() {
+          if (!ctx || !freezeLoopNodes) return;
+          const now = ctx.currentTime;
+          try {
+            freezeLoopNodes.gain.gain.cancelScheduledValues(now);
+            freezeLoopNodes.gain.gain.setValueAtTime(freezeLoopNodes.gain.gain.value || 0.01, now);
+            freezeLoopNodes.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+            freezeLoopNodes.osc.stop(now + 0.1);
+            freezeLfoNodes.lfo.stop(now + 0.1);
+          } catch (e) {}
+          freezeLoopNodes = null;
+          freezeLfoNodes = null;
+        }
+
+        function startScoreTicks(durationMs = 1000) {
+          if (scoreTickTimer) clearInterval(scoreTickTimer);
+          const interval = Number(configRef.audio.scoreTickIntervalMs || 40);
+          let tickIndex = 0;
+          scoreTickTimer = setInterval(() => {
+            const base = 680 + (tickIndex % 4) * 45;
+            playTone({
+              freq: base,
+              endFreq: base + 20,
+              duration: 0.05,
+              type: 'sine',
+              filterFreq: 1800,
+              volumeMultiplier: 0.28
+            });
+            tickIndex += 1;
+          }, interval);
+          setTimeout(() => {
+            if (scoreTickTimer) clearInterval(scoreTickTimer);
+            scoreTickTimer = null;
+            playSequence([
+              { freq: 920, endFreq: 980, duration: 0.09, type: 'triangle', filterFreq: 2200, volumeMultiplier: 0.5 },
+              { freq: 1180, endFreq: 1280, duration: 0.12, type: 'sine', filterFreq: 2600, volumeMultiplier: 0.45, delay: 55 }
+            ]);
+          }, durationMs);
+        }
+
+        return {
+          correct() {
+            playSequence([
+              { freq: 560, endFreq: 760, duration: 0.12, type: 'triangle', filterFreq: 2000, volumeMultiplier: 0.9 },
+              { freq: 840, endFreq: 1080, duration: 0.16, type: 'sine', filterFreq: 2600, volumeMultiplier: 0.72, delay: 70 }
+            ]);
+          },
+          wrong() {
+            playSequence([
+              { freq: 320, endFreq: 250, duration: 0.16, type: 'triangle', filterFreq: 900, volumeMultiplier: 0.7 },
+              { freq: 220, endFreq: 170, duration: 0.18, type: 'sine', filterFreq: 700, volumeMultiplier: 0.55, delay: 65 }
+            ]);
+          },
+          click() {
+            playTone({
+              freq: 760,
+              endFreq: 620,
+              duration: 0.045,
+              type: 'triangle',
+              filterFreq: 1800,
+              volumeMultiplier: 0.38
+            });
+          },
+          freezeStart() {
+            playSequence([
+              { freq: 460, endFreq: 520, duration: 0.1, type: 'sine', filterFreq: 1600, volumeMultiplier: 0.7 },
+              { freq: 620, endFreq: 700, duration: 0.12, type: 'triangle', filterFreq: 1800, volumeMultiplier: 0.48, delay: 70 }
+            ]);
+            startFreezeLoop();
+          },
+          freezeStop() {
+            playTone({
+              freq: 760,
+              endFreq: 520,
+              duration: 0.1,
+              type: 'triangle',
+              filterFreq: 1500,
+              volumeMultiplier: 0.45
+            });
+            stopFreezeLoop();
+          },
+          fifty() {
+            playSequence([
+              { freq: 700, endFreq: 760, duration: 0.07, type: 'triangle', filterFreq: 1900, volumeMultiplier: 0.6 },
+              { freq: 880, endFreq: 980, duration: 0.09, type: 'sine', filterFreq: 2400, volumeMultiplier: 0.52, delay: 55 }
+            ]);
+          },
+          perfect() {
+            playSequence([
+              { freq: 980, endFreq: 1160, duration: 0.11, type: 'triangle', filterFreq: 2600, volumeMultiplier: 0.72 },
+              { freq: 1320, endFreq: 1540, duration: 0.13, type: 'sine', filterFreq: 3000, volumeMultiplier: 0.55, delay: 45 },
+              { freq: 1680, endFreq: 1880, duration: 0.15, type: 'sine', filterFreq: 3400, volumeMultiplier: 0.38, delay: 100 }
+            ]);
+          },
+          achievement() {
+            playSequence([
+              { freq: 740, endFreq: 820, duration: 0.08, type: 'triangle', filterFreq: 2200, volumeMultiplier: 0.55 },
+              { freq: 980, endFreq: 1100, duration: 0.1, type: 'sine', filterFreq: 2600, volumeMultiplier: 0.48, delay: 60 },
+              { freq: 1240, endFreq: 1380, duration: 0.12, type: 'sine', filterFreq: 3000, volumeMultiplier: 0.42, delay: 120 }
+            ]);
+          },
+          scoreCount(durationMs) { startScoreTicks(durationMs); },
+          shutdown() {
+            stopFreezeLoop();
+            if (scoreTickTimer) clearInterval(scoreTickTimer);
+            scoreTickTimer = null;
+          }
+        };
+      }
+
+      function createGame() {
+        let rootEl = null;
+        let config = deepMerge({}, DEFAULT_CONFIG);
+        let questions = DEFAULT_QUESTIONS.slice();
+        let rafId = 0;
+        let lastTs = 0;
+        let roundTimeout = null;
+        let freezeInterval = null;
+        let resizeObserver = null;
+        let audio = createAudioManager(config);
+        let scoreAnimFrame = 0;
+
+        const state = {
+          status: 'idle',
+          currentQuestionIndex: 0,
+          lives: 3,
+          correctAnswers: 0,
+          wrongAnswers: 0,
+          combo: 0,
+          bestCombo: 0,
+          perfectAnswers: 0,
+          perfectStreak: 0,
+          progressStep: 0,
+          stepsToFinish: 5,
+          accuracy: 0,
+          score: 0,
+          displayedScore: 0,
+          scoreAnimating: false,
+          energy: 0,
+          achievementsUnlocked: [],
+          usedFreezeAnyTime: false,
+          indicator: {
+            position: 0,
+            direction: 1,
+            speed: 300,
+            movementType: 'pingpong'
+          },
+          bonuses: {
+            freezeActive: false,
+            freezeRemainingMs: 0,
+            freezeResumeStatus: null
+          },
+          currentRound: {
+            selectedIndex: null,
+            correctIndex: null,
+            result: null,
+            bannerText: '',
+            stopAvailableAt: 0,
+            hiddenIndices: [],
+            visibleIndices: [],
+            questionId: null,
+            isPerfect: false,
+            awardedScore: 0,
+            mode: 'normal',
+            stepGain: 1,
+            energyGain: 0
+          }
+        };
+
+        const dom = {};
+        function emit(eventName, detail) { if (rootEl) rootEl.dispatchEvent(new CustomEvent(eventName, { detail })); }
+
+        function applyThemeConfig() {
+          if (!rootEl) return;
+          THEME_VAR_NAMES.forEach((varName) => rootEl.style.removeProperty(varName));
+          const themeVars = mapThemeToCssVars(config.theme || {}, THEME_VAR_MAP);
+          Object.entries(themeVars).forEach(([varName, value]) => {
+            rootEl.style.setProperty(varName, value);
+          });
+        }
+
+        function destroyTimers() {
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = 0;
+          if (scoreAnimFrame) cancelAnimationFrame(scoreAnimFrame);
+          scoreAnimFrame = 0;
+          if (roundTimeout) clearTimeout(roundTimeout);
+          roundTimeout = null;
+          if (freezeInterval) clearInterval(freezeInterval);
+          freezeInterval = null;
+          if (dom.inlineToastTimer) clearTimeout(dom.inlineToastTimer);
+          if (dom.inlineToast) dom.inlineToast.className = 'mot-inline-toast';
+          if (dom.inlineToastTitle) dom.inlineToastTitle.textContent = '';
+          if (dom.inlineToastText) dom.inlineToastText.textContent = '';
+          dom.inlineToastTimer = null;
+          audio.freezeStop();
+          lastTs = 0;
+        }
+
+        const getCurrentQuestion = () => questions[state.currentQuestionIndex];
+        const getTotalAnswered = () => state.correctAnswers + state.wrongAnswers;
+        function updateAccuracy() {
+          state.accuracy = getTotalAnswered() > 0 ? Math.round((state.correctAnswers / getTotalAnswered()) * 100) : 0;
+        }
+
+        function getLifeIcons() {
+          const maxLives = config.gameplay.lives;
+          const currentLives = state.lives;
+          let out = '';
+          const icon = config.ui.lifeDisplay === 'hearts' ? '♥' : '●';
+          for (let i = 0; i < maxLives; i++) {
+            out += i < currentLives ? icon : '♡';
+            if (i < maxLives - 1) out += ' ';
+          }
+          return out;
+        }
+
+        function getComboMessage(combo) {
+          if (config.messages.combo[combo]) return config.messages.combo[combo];
+          if (combo >= 5) return config.messages.combo[5];
+          if (combo >= 3) return config.messages.combo[3];
+          if (combo >= 2) return config.messages.combo[2];
+          return '';
+        }
+
+        function questionModeClass(mode) {
+          if (mode === 'boss') return 'mot-question--boss';
+          if (mode === 'speed') return 'mot-question--speed';
+          if (mode === 'safe') return 'mot-question--safe';
+          if (mode === 'double_step') return 'mot-question--double';
+          return '';
+        }
+
+        function getBonusAvailable(type) {
+          const energy = state.energy;
+          if (type === 'freeze') return energy >= Number(config.bonuses.freezeCost || 100);
+          if (type === 'fifty') return energy >= Number(config.bonuses.fiftyCost || 60);
+          return false;
+        }
+
+        function spendEnergy(amount) {
+          state.energy = clamp(state.energy - amount, 0, Number(config.bonuses.energyMax || 100));
+        }
+
+        function gainEnergy(amount) {
+          state.energy = clamp(state.energy + amount, 0, Number(config.bonuses.energyMax || 100));
+        }
+
+        function animateScoreTo(target, durationMs = 800) {
+          if (scoreAnimFrame) cancelAnimationFrame(scoreAnimFrame);
+          const start = state.displayedScore;
+          const diff = target - start;
+          const startTime = performance.now();
+          state.scoreAnimating = true;
+          audio.scoreCount(durationMs);
+          function frame(now) {
+            const progress = clamp((now - startTime) / durationMs, 0, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            state.displayedScore = Math.round(start + diff * eased);
+            render();
+            if (progress < 1) scoreAnimFrame = requestAnimationFrame(frame);
+            else {
+              state.displayedScore = target;
+              state.scoreAnimating = false;
+              scoreAnimFrame = 0;
+              render();
+            }
+          }
+          scoreAnimFrame = requestAnimationFrame(frame);
+        }
+
+        function showToast(title, text, type = 'achievement') {
+          if (!dom.inlineToast) return;
+          if (dom.inlineToastTimer) clearTimeout(dom.inlineToastTimer);
+          dom.inlineToast.className = `mot-inline-toast mot-inline-toast--${type} mot-inline-toast--visible`;
+          dom.inlineToastTitle.textContent = title;
+          dom.inlineToastText.textContent = text;
+          dom.inlineToastTimer = setTimeout(() => {
+            dom.inlineToast.className = 'mot-inline-toast';
+            dom.inlineToastTitle.textContent = '';
+            dom.inlineToastText.textContent = '';
+            dom.inlineToastTimer = null;
+          }, 2200);
+        }
+
+        function triggerPerfectBurst() {
+          dom.perfectBurst.classList.remove('mot-perfect-burst--show');
+          void dom.perfectBurst.offsetWidth;
+          dom.perfectBurst.textContent = config.perfect.text || 'ИДЕАЛ!';
+          dom.perfectBurst.classList.add('mot-perfect-burst--show');
+        }
+
+        function triggerShake() {
+          dom.mainPanel.classList.remove('mot-shake');
+          void dom.mainPanel.offsetWidth;
+          dom.mainPanel.classList.add('mot-shake');
+        }
+
+        function maybeUnlockAchievement(code) {
+          if (!config.achievements.enabled) return;
+          const found = (config.achievements.list || []).find((item) => item.check === code);
+          if (!found) return;
+          if (state.achievementsUnlocked.includes(found.id)) return;
+          state.achievementsUnlocked.push(found.id);
+          audio.achievement();
+          showToast(found.title, found.text, 'achievement');
+        }
+
+        function checkAchievementsOnCorrect() {
+          if (state.combo >= 3) maybeUnlockAchievement('combo3');
+          if (state.combo >= 5) maybeUnlockAchievement('combo5');
+          if (state.perfectStreak >= 3) maybeUnlockAchievement('perfect3');
+        }
+
+        function checkAchievementsOnWin() {
+          if (state.lives <= 1) maybeUnlockAchievement('survivor');
+          if (!state.usedFreezeAnyTime) maybeUnlockAchievement('cool');
+        }
+
+        function spawnConfetti(count = 80) {
+          if (!dom.confettiLayer) return;
+          dom.confettiLayer.innerHTML = '';
+          const colors = ['#22c55e', '#38bdf8', '#f59e0b', '#ef4444', '#a78bfa', '#fde68a'];
+          for (let i = 0; i < count; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'mot-confetti';
+            piece.style.left = `${Math.random() * 100}%`;
+            piece.style.background = colors[i % colors.length];
+            piece.style.animationDuration = `${3.2 + Math.random() * 2.2}s`;
+            piece.style.animationDelay = `${Math.random() * 0.35}s`;
+            piece.style.transform = `translateY(0) rotate(${Math.random() * 360}deg)`;
+            dom.confettiLayer.appendChild(piece);
+          }
+        }
+
+        function render() {
+          if (!rootEl) return;
+          rootEl.dataset.state = state.status;
+          updateAccuracy();
+          const question = getCurrentQuestion();
+          const answers = question ? question.answers : [];
+          const segments = answers.length || 1;
+          const segmentColumns = `repeat(${segments}, minmax(0, 1fr))`;
+
+          dom.currentQuestionIndex.textContent = String(state.currentQuestionIndex + 1);
+          dom.questionsTotal.textContent = String(questions.length);
+          dom.combo.textContent = `x${state.combo}`;
+          dom.bestCombo.textContent = `x${state.bestCombo}`;
+          dom.accuracy.textContent = `${state.accuracy}%`;
+          dom.lives.textContent = getLifeIcons();
+          dom.score.textContent = String(state.displayedScore);
+          dom.status.textContent = state.status;
+          dom.goal.textContent = String(config.gameplay.stepsToFinish);
+          dom.perfectCount.textContent = String(state.perfectAnswers);
+          dom.questionText.textContent = question ? question.question : '—';
+          dom.questionBox.className = `mot-panel mot-question ${questionModeClass(question && question.mode)}`.trim();
+          dom.scoreStat.classList.toggle('mot-stat--highlight', state.combo >= 3 || state.scoreAnimating);
+          dom.score.classList.toggle('mot-score-counting', state.scoreAnimating);
+          dom.lifeStat.classList.toggle('mot-stat--danger', state.lives <= Number(config.gameplay.lastChanceLivesThreshold || 1));
+
+          dom.stopButton.disabled = !(
+            state.status === 'indicator_moving' && performance.now() >= state.currentRound.stopAvailableAt && !state.bonuses.freezeActive
+          );
+          dom.freezeButton.disabled = !(state.status === 'indicator_moving' && getBonusAvailable('freeze'));
+          dom.fiftyButton.disabled = !(state.status === 'indicator_moving' && getBonusAvailable('fifty'));
+          dom.freezeButton.classList.toggle('mot-btn--bonus-ready', getBonusAvailable('freeze'));
+          dom.freezeButton.classList.toggle('mot-btn--freeze-active', state.bonuses.freezeActive);
+          dom.fiftyButton.classList.toggle('mot-btn--bonus-ready', getBonusAvailable('fifty'));
+          dom.freezeButton.textContent = state.bonuses.freezeActive ? 'Стоп-кадр активен' : `Стоп-кадр (${config.bonuses.freezeCost})`;
+          dom.fiftyButton.textContent = `50/50 (${config.bonuses.fiftyCost})`;
+
+          const timerVisible = state.bonuses.freezeActive;
+          dom.timerPill.classList.toggle('mot-timer__pill--visible', timerVisible);
+          dom.timerValue.textContent = timerVisible ? `${Math.ceil(state.bonuses.freezeRemainingMs / 1000)} c` : '';
+
+          const energyMax = Number(config.bonuses.energyMax || 100);
+          dom.energyValue.textContent = `${state.energy}/${energyMax}`;
+          dom.energyFill.style.width = `${percent(state.energy, energyMax)}%`;
+
+          dom.railSegments.style.gridTemplateColumns = segmentColumns;
+          dom.answerBand.style.gridTemplateColumns = segmentColumns;
+          dom.rail.classList.toggle('mot-rail--hide-borders', !config.ui.showSegmentBorders);
+          dom.answerBand.classList.toggle('mot-answer-band--hide-borders', !config.ui.showSegmentBorders);
+          dom.railSegments.innerHTML = '';
+          dom.answerBand.innerHTML = '';
+
+          answers.forEach((answer, index) => {
+            const segmentEl = document.createElement('div');
+            segmentEl.className = 'mot-rail__segment';
+            if (state.currentRound.result === 'correct' && index === state.currentRound.correctIndex) segmentEl.classList.add('mot-rail__segment--correct');
+            if (state.currentRound.result === 'wrong') {
+              if (index === state.currentRound.correctIndex) segmentEl.classList.add('mot-rail__segment--correct');
+              if (index === state.currentRound.selectedIndex) segmentEl.classList.add('mot-rail__segment--wrong');
+            }
+            dom.railSegments.appendChild(segmentEl);
+
+            const cellEl = document.createElement('div');
+            cellEl.className = 'mot-answer-band__cell';
+            cellEl.textContent = truncateText(String(answer), config.gameplay.maxAnswerLength);
+            if (state.currentRound.hiddenIndices.includes(index)) cellEl.classList.add('mot-answer-band__cell--hidden');
+            if (state.currentRound.result === 'correct' && index === state.currentRound.correctIndex) cellEl.classList.add('mot-answer-band__cell--correct');
+            if (state.currentRound.result === 'wrong') {
+              if (index === state.currentRound.correctIndex) cellEl.classList.add('mot-answer-band__cell--correct');
+              if (index === state.currentRound.selectedIndex) cellEl.classList.add('mot-answer-band__cell--wrong');
+            }
+            if (state.currentRound.isPerfect && index === state.currentRound.correctIndex) cellEl.classList.add('mot-answer-band__cell--perfect');
+            dom.answerBand.appendChild(cellEl);
+          });
+
+          renderProgressTrack();
+          renderIndicator();
+          renderBanner();
+          renderStartScreen();
+          renderFinalScreen();
+        }
+
+        function renderProgressTrack() {
+          dom.trackFill.style.width = `${percent(state.progressStep, state.stepsToFinish)}%`;
+          dom.trackTicks.innerHTML = '';
+          dom.trackTicks.style.gridTemplateColumns = `repeat(${state.stepsToFinish}, minmax(0, 1fr))`;
+          for (let i = 0; i < state.stepsToFinish; i++) {
+            const tick = document.createElement('div');
+            tick.className = 'mot-track__tick';
+            dom.trackTicks.appendChild(tick);
+          }
+          const progressRatio = clamp(state.progressStep / state.stepsToFinish, 0, 1);
+          dom.trackRunner.style.left = `${progressRatio * 100}%`;
+          if (config.progress.playerTokenImage) {
+            dom.trackRunner.classList.add('mot-track__runner--image');
+            dom.trackRunner.innerHTML = `<img src="${config.progress.playerTokenImage}" alt="Маркер игрока">`;
+          } else {
+            dom.trackRunner.classList.remove('mot-track__runner--image');
+            dom.trackRunner.innerHTML = '';
+            dom.trackRunner.setAttribute('aria-label', config.progress.playerLabel || 'Маркер игрока');
+          }
+          dom.trackFinish.textContent = config.progress.finishLabel || config.progress.finishIcon || 'Финиш';
+        }
+
+function renderIndicator() {
+  const railRect = dom.rail.getBoundingClientRect();
+  const width = railRect.width || dom.rail.clientWidth || 1;
+  const x = clamp(state.indicator.position * width, 0, width);
+  dom.indicator.style.left = `${x}px`;
+  dom.indicator.classList.toggle('mot-indicator--frozen', state.bonuses.freezeActive);
+  dom.indicator.classList.toggle('mot-indicator--moving', state.status === 'indicator_moving' && !state.bonuses.freezeActive);
+}
+
+
+        function renderBanner() {
+          dom.banner.className = 'mot-banner';
+          if (state.status === 'question_ready' || state.status === 'indicator_moving') {
+            dom.banner.classList.add('mot-banner--info');
+            if (state.lives <= Number(config.gameplay.lastChanceLivesThreshold || 1)) {
+              dom.banner.textContent = config.messages.lastChance || 'Последний шанс!';
+              return;
+            }
+            if (state.bonuses.freezeActive) {
+              dom.banner.textContent = 'Стоп-кадр активен. Следи за таймером бонуса.';
+              return;
+            }
+            const comboMessage = getComboMessage(state.combo);
+            const energyHint = getBonusAvailable('freeze') || getBonusAvailable('fifty') ? ' Бонус готов.' : '';
+            dom.banner.textContent = (comboMessage || 'Останови индикатор в секторе правильного ответа.') + energyHint;
+            return;
+          }
+          if (state.currentRound.isPerfect && state.currentRound.result === 'correct') {
+            dom.banner.classList.add('mot-banner--perfect');
+            dom.banner.textContent = state.currentRound.bannerText || `${randomFrom(config.messages.perfect)} +${state.currentRound.awardedScore}`;
+            return;
+          }
+          if (state.currentRound.result === 'correct') {
+            dom.banner.classList.add('mot-banner--correct');
+            const comboMessage = getComboMessage(state.combo);
+            dom.banner.textContent = state.currentRound.bannerText || `${comboMessage || randomFrom(config.messages.correct)} +${state.currentRound.awardedScore}`;
+            return;
+          }
+          if (state.currentRound.result === 'wrong') {
+            dom.banner.classList.add('mot-banner--wrong');
+            dom.banner.textContent = state.currentRound.bannerText || randomFrom(config.messages.wrong);
+            return;
+          }
+          dom.banner.classList.add('mot-banner--info');
+          dom.banner.textContent = 'Система готова к следующему вопросу.';
+        }
+
+        function renderFinalScreen() {
+          const visible = state.status === 'game_win' || state.status === 'game_lose';
+          dom.final.classList.toggle('mot-final--visible', visible);
+          if (!visible) return;
+          const won = state.status === 'game_win';
+          const progressPercent = percent(state.progressStep, state.stepsToFinish);
+          const stepsLeft = Math.max(state.stepsToFinish - state.progressStep, 0);
+          dom.final.classList.toggle('mot-final--win', won);
+          dom.final.classList.toggle('mot-final--lose', !won);
+          dom.finalCard.classList.toggle('mot-final__card--win', won);
+          dom.finalCard.classList.toggle('mot-final__card--lose', !won);
+          dom.finalEyebrow.textContent = won ? 'Финиш достигнут' : 'Раунд завершен';
+          dom.finalTitle.textContent = won ? 'Победа!' : 'Попробуй еще раз';
+          dom.finalSubtitle.textContent = won
+            ? 'Ты дошел до финиша и удержал темп до самого конца.'
+            : 'Жизни закончились раньше финиша, но раунд уже выглядит многообещающе.';
+          dom.finalSummary.textContent = won
+            ? `Точность ${state.accuracy}%, лучшая серия x${state.bestCombo}${state.perfectAnswers ? ` и ${state.perfectAnswers} идеальных попаданий` : ''}.`
+            : `До финиша оставалось ${stepsLeft} шагов. Следующая попытка может быть еще сильнее.`;
+          dom.finalScore.textContent = String(state.displayedScore);
+          dom.finalCorrect.textContent = String(state.correctAnswers);
+          dom.finalWrong.textContent = String(state.wrongAnswers);
+          dom.finalProgress.textContent = `${state.progressStep} / ${state.stepsToFinish} шагов`;
+          dom.finalProgressFill.style.width = `${progressPercent}%`;
+          dom.finalAccuracy.textContent = `${state.accuracy}%`;
+          dom.finalBestCombo.textContent = `x${state.bestCombo}`;
+          dom.finalPerfect.textContent = String(state.perfectAnswers);
+        }
+
+        function renderStartScreen() {
+          const visible = state.status === 'idle';
+          dom.start.classList.toggle('mot-intro--visible', visible);
+          if (!visible) return;
+          dom.startLives.textContent = String(config.gameplay.lives);
+          dom.startGoal.textContent = String(config.gameplay.stepsToFinish);
+          dom.startQuestions.textContent = String(questions.length);
+        }
+
+        function setStatus(nextStatus) { state.status = nextStatus; render(); }
+
+        function computeSelectedSegment() {
+          const question = getCurrentQuestion();
+          const totalSegments = question.answers.length;
+          const width = 1 / totalSegments;
+          const rawIndex = Math.floor(clamp(state.indicator.position, 0, 0.999999) / width);
+          return clamp(rawIndex, 0, totalSegments - 1);
+        }
+
+        function isPerfectHit(question, selectedIndex) {
+          if (!config.perfect.enabled) return false;
+          if (selectedIndex !== question.correct_index) return false;
+          const totalSegments = question.answers.length;
+          const segmentWidth = 1 / totalSegments;
+          const segmentStart = selectedIndex * segmentWidth;
+          const center = segmentStart + segmentWidth / 2;
+          const threshold = segmentWidth * Number(config.perfect.thresholdRatio || 0.12);
+          return Math.abs(state.indicator.position - center) <= threshold;
+        }
+
+        function resetRoundState() {
+          state.currentRound.selectedIndex = null;
+          state.currentRound.correctIndex = null;
+          state.currentRound.result = null;
+          state.currentRound.bannerText = '';
+          state.currentRound.hiddenIndices = [];
+          state.currentRound.visibleIndices = [];
+          state.currentRound.questionId = null;
+          state.currentRound.isPerfect = false;
+          state.currentRound.awardedScore = 0;
+          state.currentRound.mode = 'normal';
+          state.currentRound.stepGain = 1;
+          state.currentRound.energyGain = 0;
+        }
+
+        function loadQuestion(index) {
+          const question = questions[index];
+          if (!question) return;
+          resetRoundState();
+          state.currentRound.questionId = question.id;
+          state.currentRound.correctIndex = question.correct_index;
+          state.currentRound.visibleIndices = question.answers.map((_, i) => i);
+          state.currentRound.mode = question.mode || 'normal';
+          state.indicator.position = 0;
+          state.indicator.direction = 1;
+          state.indicator.speed = Number(question.speed || config.movement.defaultSpeed || 300);
+          state.indicator.movementType = config.movement.movementType || 'pingpong';
+          state.currentRound.stopAvailableAt = performance.now() + Number(config.movement.minStopDelayMs || 800);
+          emit('QUESTION_LOAD', { index, question });
+          setStatus('question_ready');
+        }
+
+        function tick(ts) {
+          if (!lastTs) lastTs = ts;
+          const delta = (ts - lastTs) / 1000;
+          lastTs = ts;
+          if (state.status === 'indicator_moving' && !state.bonuses.freezeActive) {
+            const railRect = dom.rail.getBoundingClientRect();
+            const width = Math.max(railRect.width, 1);
+            const speedPxPerSec = state.indicator.speed;
+            const speedNorm = speedPxPerSec / width;
+            let nextPos = state.indicator.position + speedNorm * delta * state.indicator.direction;
+            if (state.indicator.movementType === 'pingpong') {
+              if (nextPos >= 1) { nextPos = 1 - (nextPos - 1); state.indicator.direction = -1; }
+              else if (nextPos <= 0) { nextPos = Math.abs(nextPos); state.indicator.direction = 1; }
+            } else {
+              if (nextPos >= 1) nextPos = nextPos - 1;
+              if (nextPos < 0) nextPos = 1 + nextPos;
+            }
+            state.indicator.position = clamp(nextPos, 0, 1);
+            renderIndicator();
+            if (performance.now() >= state.currentRound.stopAvailableAt) dom.stopButton.disabled = false;
+          }
+          rafId = requestAnimationFrame(tick);
+        }
+
+        function startIndicator() {
+          if (state.status !== 'idle' && state.status !== 'question_ready' && state.status !== 'transition_next') return;
+          emit('INDICATOR_START', { questionIndex: state.currentQuestionIndex });
+          setStatus('indicator_moving');
+        }
+
+        function useFreeze() {
+          if (!(state.status === 'indicator_moving' && getBonusAvailable('freeze'))) return;
+          spendEnergy(Number(config.bonuses.freezeCost || 100));
+          state.bonuses.freezeActive = true;
+          state.bonuses.freezeRemainingMs = Number(config.bonuses.freezeDurationMs || 10000);
+          state.bonuses.freezeResumeStatus = 'indicator_moving';
+          state.usedFreezeAnyTime = true;
+          emit('BONUS_USE_FREEZE', { freezeDurationMs: state.bonuses.freezeRemainingMs });
+          audio.freezeStart();
+          render();
+          const startedAt = Date.now();
+          freezeInterval = setInterval(() => {
+            const elapsed = Date.now() - startedAt;
+            state.bonuses.freezeRemainingMs = Math.max(0, Number(config.bonuses.freezeDurationMs || 10000) - elapsed);
+            render();
+            if (state.bonuses.freezeRemainingMs <= 0) {
+              clearInterval(freezeInterval);
+              freezeInterval = null;
+              state.bonuses.freezeActive = false;
+              state.bonuses.freezeRemainingMs = 0;
+              audio.freezeStop();
+              render();
+            }
+          }, 100);
+        }
+
+        function useFifty() {
+          if (!(state.status === 'indicator_moving' && getBonusAvailable('fifty'))) return;
+          const question = getCurrentQuestion();
+          const wrongIndices = question.answers.map((_, i) => i).filter((i) => i !== question.correct_index);
+          if (wrongIndices.length <= 1) return;
+          const keptWrongIndex = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+          const hide = wrongIndices.filter((i) => i !== keptWrongIndex).slice(0, 2);
+          spendEnergy(Number(config.bonuses.fiftyCost || 60));
+          state.currentRound.hiddenIndices = hide;
+          emit('BONUS_USE_FIFTY', { hiddenIndices: hide, keptWrongIndex });
+          audio.fifty();
+          render();
+        }
+
+        function calculateRoundRewards(question, isCorrect, isPerfect) {
+          let awardedScore = 0;
+          let stepGain = 0;
+          let energyGain = 0;
+          if (!isCorrect) return { awardedScore, stepGain, energyGain };
+          const comboMultiplier = Math.min(state.combo, Number(config.scoring.comboCap || 5)) * Number(config.scoring.comboStep || 50);
+          awardedScore += Number(config.scoring.baseCorrect || 100) + comboMultiplier;
+          energyGain += Number(config.bonuses.energyGainCorrect || 30);
+          stepGain = 1;
+          if (question.mode === 'speed') awardedScore = Math.round(awardedScore * Number(config.scoring.speedRoundMultiplier || 1.5));
+          if (question.mode === 'boss') awardedScore = Math.round(awardedScore * Number(config.scoring.bossRoundMultiplier || 2));
+          if (question.mode === 'double_step') {
+            stepGain = 2;
+            awardedScore += Number(config.scoring.doubleStepBonus || 50);
+          }
+          if (isPerfect) {
+            awardedScore += Number(config.scoring.perfectBonus || 100);
+            energyGain += Number(config.bonuses.energyGainPerfect || 20);
+          }
+          return { awardedScore, stepGain, energyGain };
+        }
+
+        function checkAnswer() {
+          if (state.status !== 'indicator_stopped') return;
+          const question = getCurrentQuestion();
+          const isCorrect = state.currentRound.selectedIndex === question.correct_index;
+          const perfectHit = isPerfectHit(question, state.currentRound.selectedIndex);
+          state.currentRound.correctIndex = question.correct_index;
+          state.currentRound.result = isCorrect ? 'correct' : 'wrong';
+          state.currentRound.isPerfect = perfectHit;
+          emit('ANSWER_CHECK', { selectedIndex: state.currentRound.selectedIndex, correctIndex: question.correct_index, isCorrect, perfectHit });
+
+          if (isCorrect) {
+            state.combo += 1;
+            state.bestCombo = Math.max(state.bestCombo, state.combo);
+            state.correctAnswers += 1;
+            state.perfectStreak = perfectHit ? state.perfectStreak + 1 : 0;
+            if (perfectHit) state.perfectAnswers += 1;
+            const rewards = calculateRoundRewards(question, true, perfectHit);
+            state.currentRound.awardedScore = rewards.awardedScore;
+            state.currentRound.stepGain = rewards.stepGain;
+            state.currentRound.energyGain = rewards.energyGain;
+            state.progressStep += rewards.stepGain;
+            state.score += rewards.awardedScore;
+            gainEnergy(rewards.energyGain);
+            state.currentRound.bannerText = perfectHit
+              ? `${randomFrom(config.messages.perfect)} +${rewards.awardedScore}`
+              : `${getComboMessage(state.combo) || randomFrom(config.messages.correct)} +${rewards.awardedScore}`;
+            animateScoreTo(state.score, Number(config.gameplay.scoreCountDurationMs || 1200));
+            if (perfectHit) {
+              audio.perfect();
+              triggerPerfectBurst();
+              showToast('Идеал', `+${rewards.awardedScore} очков`, 'perfect');
+            } else {
+              audio.correct();
+            }
+            checkAchievementsOnCorrect();
+            emit('ANSWER_CORRECT', { progressStep: state.progressStep, combo: state.combo, awardedScore: rewards.awardedScore });
+          } else {
+            const safeRound = question.mode === 'safe' && config.gameplay.safeRoundNoLifeLoss;
+            if (!safeRound) state.lives -= 1;
+            state.wrongAnswers += 1;
+            state.combo = 0;
+            state.perfectStreak = 0;
+            state.currentRound.awardedScore = 0;
+            state.currentRound.stepGain = 0;
+            state.currentRound.energyGain = -Number(config.bonuses.energyLossWrong || 20);
+            state.currentRound.bannerText = randomFrom(config.messages.wrong);
+            gainEnergy(-Number(config.bonuses.energyLossWrong || 20));
+            audio.wrong();
+            triggerShake();
+            emit('ANSWER_WRONG', { lives: state.lives, safeRound });
+          }
+
+          updateAccuracy();
+          setStatus('showing_result');
+
+          if (state.progressStep >= state.stepsToFinish) {
+            roundTimeout = setTimeout(() => {
+              checkAchievementsOnWin();
+              emit('GAME_WIN', { state: getPublicState() });
+              setStatus('game_win');
+              spawnConfetti(100);
+            }, 1100);
+            return;
+          }
+          if (state.lives <= 0) {
+            roundTimeout = setTimeout(() => {
+              emit('GAME_LOSE', { state: getPublicState() });
+              setStatus('game_lose');
+            }, 1100);
+            return;
+          }
+          roundTimeout = setTimeout(() => nextQuestion(), Number(config.ui.autoNextDelayMs || 1700));
+        }
+
+        function stopIndicator() {
+          if (state.status !== 'indicator_moving') return;
+          if (performance.now() < state.currentRound.stopAvailableAt) return;
+          if (state.bonuses.freezeActive) return;
+          state.currentRound.selectedIndex = computeSelectedSegment();
+          emit('INDICATOR_STOP', { indicatorPosition: state.indicator.position, selectedIndex: state.currentRound.selectedIndex });
+          setStatus('indicator_stopped');
+          checkAnswer();
+        }
+
+        function nextQuestion() {
+          if (state.status === 'game_win' || state.status === 'game_lose') return;
+          state.currentQuestionIndex = (state.currentQuestionIndex + 1) % questions.length;
+          emit('NEXT_QUESTION', { currentQuestionIndex: state.currentQuestionIndex });
+          loadQuestion(state.currentQuestionIndex);
+          roundTimeout = setTimeout(() => startIndicator(), 260);
+        }
+
+        function getPublicState() {
+          return JSON.parse(JSON.stringify({
+            status: state.status,
+            currentQuestionIndex: state.currentQuestionIndex,
+            lives: state.lives,
+            correctAnswers: state.correctAnswers,
+            wrongAnswers: state.wrongAnswers,
+            combo: state.combo,
+            bestCombo: state.bestCombo,
+            perfectAnswers: state.perfectAnswers,
+            progressStep: state.progressStep,
+            stepsToFinish: state.stepsToFinish,
+            accuracy: state.accuracy,
+            score: state.score,
+            displayedScore: state.displayedScore,
+            energy: state.energy,
+            achievementsUnlocked: state.achievementsUnlocked,
+            indicator: state.indicator,
+            bonuses: state.bonuses,
+            currentRound: state.currentRound
+          }));
+        }
+
+        function attachEvents() {
+          dom.startButton.addEventListener('click', () => { audio.click(); api.start(); });
+          dom.stopButton.addEventListener('click', () => { audio.click(); stopIndicator(); });
+          dom.freezeButton.addEventListener('click', () => { audio.click(); useFreeze(); });
+          dom.fiftyButton.addEventListener('click', () => { audio.click(); useFifty(); });
+          dom.restartButton.addEventListener('click', () => { audio.click(); api.restart(); });
+          dom.exitButton.addEventListener('click', () => { audio.click(); api.showIntro(); });
+        }
+
+        function buildDOM(mountEl) {
+          mountEl.innerHTML = '';
+          const wrapper = document.createElement('div');
+          wrapper.className = 'mot-root';
+          wrapper.innerHTML = `
+            <div class="mot-shell">
+              <section class="mot-panel mot-hud" aria-label="Верхняя панель">
+                <div class="mot-stat mot-stat--progress"><div class="mot-stat__label">Вопрос</div><div class="mot-stat__value"><span data-mot="currentQuestionIndex">1</span> / <span data-mot="questionsTotal">0</span></div></div>
+                <div class="mot-stat mot-stat--combo mot-stat--highlight"><div class="mot-stat__label">Серия</div><div class="mot-stat__value" data-mot="combo">x0</div></div>
+                <div class="mot-stat"><div class="mot-stat__label">Лучшая серия</div><div class="mot-stat__value" data-mot="bestCombo">x0</div></div>
+                <div class="mot-stat mot-stat--score" data-mot="scoreStat"><div class="mot-stat__label">Очки</div><div class="mot-stat__value" data-mot="score">0</div></div>
+                <div class="mot-stat"><div class="mot-stat__label">Идеал</div><div class="mot-stat__value" data-mot="perfectCount">0</div></div>
+                <div class="mot-stat"><div class="mot-stat__label">Точность</div><div class="mot-stat__value" data-mot="accuracy">0%</div></div>
+                <div class="mot-stat mot-stat--lives" data-mot="lifeStat"><div class="mot-stat__label">Жизни</div><div class="mot-stat__value" data-mot="lives">♥ ♥ ♥</div></div>
+                <div class="mot-stat mot-stat--goal"><div class="mot-stat__label">Цель</div><div class="mot-stat__value"><span data-mot="goal">0</span> шагов</div></div>
+              </section>
+
+              <section class="mot-panel mot-progress" aria-label="Трек прогресса">
+                <div class="mot-progress__header">
+                  <div class="mot-progress__title">Прогресс игрока</div>
+                  <div class="mot-progress__meta">Дойди до финиша раньше, чем закончатся жизни</div>
+                </div>
+                <div class="mot-track" data-mot="track">
+                  <div class="mot-track__fill" data-mot="trackFill"></div>
+                  <div class="mot-track__ticks" data-mot="trackTicks"></div>
+                  <div class="mot-track__runner" data-mot="trackRunner" aria-label="Маркер игрока"></div>
+                  <div class="mot-track__finish" data-mot="trackFinish">Финиш</div>
+                </div>
+              </section>
+
+              <section class="mot-panel mot-main" data-mot="mainPanel" aria-label="Игровой экран">
+                <div class="mot-panel mot-question" data-mot="questionBox">
+                  <div class="mot-question__inner" data-mot="questionText">Загрузка вопроса…</div>
+                </div>
+
+                <div class="mot-rail-wrap">
+                  <div class="mot-rail-frame">
+                    <div class="mot-rail" data-mot="rail">
+                      <div class="mot-rail__segments" data-mot="railSegments"></div>
+                    </div>
+                    <div class="mot-indicator" data-mot="indicator" aria-hidden="true">
+                      <div class="mot-indicator__inner">⬣</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mot-answer-band-wrap">
+                  <div class="mot-answer-band" data-mot="answerBand"></div>
+                </div>
+
+                <div class="mot-controls-row">
+                  <div class="mot-bonuses">
+                    <div class="mot-energy">
+                      <div class="mot-energy__meta"><span>Энергия бонусов</span><span data-mot="energyValue">0/100</span></div>
+                      <div class="mot-energy__bar"><div class="mot-energy__fill" data-mot="energyFill"></div></div>
+                    </div>
+                    <button class="mot-btn mot-btn--bonus" type="button" data-mot="fiftyButton">50/50</button>
+                    <button class="mot-btn mot-btn--bonus" type="button" data-mot="freezeButton">Стоп-кадр</button>
+                  </div>
+                  <button class="mot-btn mot-btn--stop" type="button" data-mot="stopButton">STOP</button>
+                </div>
+
+                <div class="mot-feedback">
+                  <div class="mot-banner mot-banner--info" data-mot="banner">Останови индикатор в секторе правильного ответа.</div>
+                  <div class="mot-inline-toast" data-mot="inlineToast" aria-live="polite">
+                    <div class="mot-inline-toast__title" data-mot="inlineToastTitle"></div>
+                    <div class="mot-inline-toast__text" data-mot="inlineToastText"></div>
+                  </div>
+                  <div class="mot-timer">
+                    <div class="mot-timer__pill" data-mot="timerPill"><span>❄</span><span>Стоп-кадр:</span><span data-mot="timerValue"></span></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="mot-perfect-burst" data-mot="perfectBurst">ИДЕАЛ!</div>
+
+            <div class="mot-intro mot-intro--visible" data-mot="startScreen" aria-live="polite">
+              <div class="mot-intro__card">
+                <div class="mot-intro__eyebrow">Интерактивная игра</div>
+                <div class="mot-intro__title">Момент истины</div>
+                <div class="mot-intro__subtitle">Выбери верный ответ, остановив индикатор в нужном секторе. Держи ритм, копи серию и дойди до финиша раньше, чем закончится запас жизней.</div>
+                <div class="mot-intro__stats">
+                  <div class="mot-intro__stat">
+                    <div class="mot-intro__stat-label">Жизни</div>
+                    <div class="mot-intro__stat-value" data-mot="startLives">3</div>
+                  </div>
+                  <div class="mot-intro__stat">
+                    <div class="mot-intro__stat-label">Цель</div>
+                    <div class="mot-intro__stat-value" data-mot="startGoal">0</div>
+                  </div>
+                  <div class="mot-intro__stat">
+                    <div class="mot-intro__stat-label">Вопросы</div>
+                    <div class="mot-intro__stat-value" data-mot="startQuestions">0</div>
+                  </div>
+                </div>
+                <div class="mot-intro__hint">«Стоп-кадр» временно фиксирует индикатор, «50/50» убирает лишние варианты, а идеальное попадание приносит больше очков.</div>
+                <div class="mot-intro__modes" aria-label="Модификаторы раунда">
+                  <div class="mot-intro__mode">
+                    <div class="mot-intro__mode-tag mot-intro__mode-tag--speed">Темп</div>
+                    <div class="mot-intro__mode-text">Повышает ценность правильного ответа в этом раунде.</div>
+                  </div>
+                  <div class="mot-intro__mode">
+                    <div class="mot-intro__mode-tag mot-intro__mode-tag--safe">Щит</div>
+                    <div class="mot-intro__mode-text">Ошибка не отнимает жизнь и даёт шанс сохранить ритм.</div>
+                  </div>
+                  <div class="mot-intro__mode">
+                    <div class="mot-intro__mode-tag mot-intro__mode-tag--double">X2 шаг</div>
+                    <div class="mot-intro__mode-text">Успешный ответ продвигает сразу на два шага вперёд.</div>
+                  </div>
+                  <div class="mot-intro__mode">
+                    <div class="mot-intro__mode-tag mot-intro__mode-tag--boss">Усиление</div>
+                    <div class="mot-intro__mode-text">Особый раунд с повышенным множителем очков.</div>
+                  </div>
+                </div>
+                <div class="mot-intro__footer">
+                  <div class="mot-intro__actions">
+                    <div class="mot-intro__meta">Нажми «Начать игру», чтобы войти в раунд</div>
+                    <button class="mot-btn mot-btn--start" type="button" data-mot="startButton">Начать игру</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mot-final" data-mot="finalScreen" aria-live="polite">
+              <div class="mot-final__card" data-mot="finalCard">
+                <div class="mot-confetti-layer" data-mot="confettiLayer"></div>
+                <div class="mot-final__eyebrow" data-mot="finalEyebrow">Раунд завершен</div>
+                <div class="mot-final__title" data-mot="finalTitle">Победа!</div>
+                <div class="mot-final__subtitle" data-mot="finalSubtitle">Результат игры</div>
+                <div class="mot-final__hero">
+                  <div class="mot-final__score-label">Итоговый счет</div>
+                  <div class="mot-final__score" data-mot="finalScore">0</div>
+                  <div class="mot-final__summary" data-mot="finalSummary">Ты уверенно прошел раунд и собрал сильный результат.</div>
+                </div>
+                <div class="mot-final__progress-block">
+                  <div class="mot-final__progress-meta">
+                    <span>Прогресс по треку</span>
+                    <span data-mot="finalProgress">0 / 0 шагов</span>
+                  </div>
+                  <div class="mot-final__progress-bar">
+                    <div class="mot-final__progress-fill" data-mot="finalProgressFill"></div>
+                  </div>
+                </div>
+                <div class="mot-final__stats">
+                  <div class="mot-final__stat"><div class="mot-final__stat-value" data-mot="finalCorrect">0</div><div class="mot-final__stat-label">Верных</div></div>
+                  <div class="mot-final__stat"><div class="mot-final__stat-value" data-mot="finalWrong">0</div><div class="mot-final__stat-label">Ошибок</div></div>
+                  <div class="mot-final__stat"><div class="mot-final__stat-value" data-mot="finalAccuracy">0%</div><div class="mot-final__stat-label">Точность</div></div>
+                  <div class="mot-final__stat"><div class="mot-final__stat-value" data-mot="finalBestCombo">x0</div><div class="mot-final__stat-label">Лучшая серия</div></div>
+                  <div class="mot-final__stat"><div class="mot-final__stat-value" data-mot="finalPerfect">0</div><div class="mot-final__stat-label">Идеал</div></div>
+                </div>
+                <div class="mot-final__actions">
+                  <button class="mot-btn mot-btn--final-primary" type="button" data-mot="restartButton">Играть снова</button>
+                  <button class="mot-btn mot-btn--final-secondary" type="button" data-mot="exitButton">На стартовый экран</button>
+                </div>
+              </div>
+            </div>
+          `;
+          mountEl.appendChild(wrapper);
+          rootEl = wrapper;
+          dom.currentQuestionIndex = rootEl.querySelector('[data-mot="currentQuestionIndex"]');
+          dom.questionsTotal = rootEl.querySelector('[data-mot="questionsTotal"]');
+          dom.combo = rootEl.querySelector('[data-mot="combo"]');
+          dom.bestCombo = rootEl.querySelector('[data-mot="bestCombo"]');
+          dom.accuracy = rootEl.querySelector('[data-mot="accuracy"]');
+          dom.lives = rootEl.querySelector('[data-mot="lives"]');
+          dom.score = rootEl.querySelector('[data-mot="score"]');
+          dom.status = { textContent: '' };
+          dom.goal = rootEl.querySelector('[data-mot="goal"]');
+          dom.track = rootEl.querySelector('[data-mot="track"]');
+          dom.trackFill = rootEl.querySelector('[data-mot="trackFill"]');
+          dom.trackTicks = rootEl.querySelector('[data-mot="trackTicks"]');
+          dom.trackRunner = rootEl.querySelector('[data-mot="trackRunner"]');
+          dom.trackFinish = rootEl.querySelector('[data-mot="trackFinish"]');
+          dom.questionText = rootEl.querySelector('[data-mot="questionText"]');
+          dom.questionBox = rootEl.querySelector('[data-mot="questionBox"]');
+          dom.rail = rootEl.querySelector('[data-mot="rail"]');
+          dom.railSegments = rootEl.querySelector('[data-mot="railSegments"]');
+          dom.indicator = rootEl.querySelector('[data-mot="indicator"]');
+          dom.answerBand = rootEl.querySelector('[data-mot="answerBand"]');
+          dom.start = rootEl.querySelector('[data-mot="startScreen"]');
+          dom.startButton = rootEl.querySelector('[data-mot="startButton"]');
+          dom.startLives = rootEl.querySelector('[data-mot="startLives"]');
+          dom.startGoal = rootEl.querySelector('[data-mot="startGoal"]');
+          dom.startQuestions = rootEl.querySelector('[data-mot="startQuestions"]');
+          dom.freezeButton = rootEl.querySelector('[data-mot="freezeButton"]');
+          dom.fiftyButton = rootEl.querySelector('[data-mot="fiftyButton"]');
+          dom.stopButton = rootEl.querySelector('[data-mot="stopButton"]');
+          dom.banner = rootEl.querySelector('[data-mot="banner"]');
+          dom.inlineToast = rootEl.querySelector('[data-mot="inlineToast"]');
+          dom.inlineToastTitle = rootEl.querySelector('[data-mot="inlineToastTitle"]');
+          dom.inlineToastText = rootEl.querySelector('[data-mot="inlineToastText"]');
+          dom.inlineToastTimer = null;
+          dom.timerPill = rootEl.querySelector('[data-mot="timerPill"]');
+          dom.timerValue = rootEl.querySelector('[data-mot="timerValue"]');
+          dom.final = rootEl.querySelector('[data-mot="finalScreen"]');
+          dom.finalCard = rootEl.querySelector('[data-mot="finalCard"]');
+          dom.finalEyebrow = rootEl.querySelector('[data-mot="finalEyebrow"]');
+          dom.finalTitle = rootEl.querySelector('[data-mot="finalTitle"]');
+          dom.finalSubtitle = rootEl.querySelector('[data-mot="finalSubtitle"]');
+          dom.finalSummary = rootEl.querySelector('[data-mot="finalSummary"]');
+          dom.finalCorrect = rootEl.querySelector('[data-mot="finalCorrect"]');
+          dom.finalWrong = rootEl.querySelector('[data-mot="finalWrong"]');
+          dom.finalProgress = rootEl.querySelector('[data-mot="finalProgress"]');
+          dom.finalProgressFill = rootEl.querySelector('[data-mot="finalProgressFill"]');
+          dom.finalAccuracy = rootEl.querySelector('[data-mot="finalAccuracy"]');
+          dom.finalScore = rootEl.querySelector('[data-mot="finalScore"]');
+          dom.finalBestCombo = rootEl.querySelector('[data-mot="finalBestCombo"]');
+          dom.finalPerfect = rootEl.querySelector('[data-mot="finalPerfect"]');
+          dom.restartButton = rootEl.querySelector('[data-mot="restartButton"]');
+          dom.exitButton = rootEl.querySelector('[data-mot="exitButton"]');
+          dom.energyValue = rootEl.querySelector('[data-mot="energyValue"]');
+          dom.energyFill = rootEl.querySelector('[data-mot="energyFill"]');
+          dom.perfectBurst = rootEl.querySelector('[data-mot="perfectBurst"]');
+          dom.mainPanel = rootEl.querySelector('[data-mot="mainPanel"]');
+          dom.lifeStat = rootEl.querySelector('[data-mot="lifeStat"]');
+          dom.scoreStat = rootEl.querySelector('[data-mot="scoreStat"]');
+          dom.perfectCount = rootEl.querySelector('[data-mot="perfectCount"]');
+          dom.confettiLayer = rootEl.querySelector('[data-mot="confettiLayer"]');
+          dom.goal.textContent = String(config.gameplay.stepsToFinish);
+          attachEvents();
+          if (typeof ResizeObserver !== 'undefined') {
+            resizeObserver = new ResizeObserver(() => renderIndicator());
+            resizeObserver.observe(rootEl);
+            resizeObserver.observe(dom.rail);
+          } else {
+            window.addEventListener('resize', renderIndicator);
+          }
+        }
+
+        function resetState() {
+          state.status = 'idle';
+          state.currentQuestionIndex = 0;
+          state.lives = Number(config.gameplay.lives || 3);
+          state.correctAnswers = 0;
+          state.wrongAnswers = 0;
+          state.combo = 0;
+          state.bestCombo = 0;
+          state.perfectAnswers = 0;
+          state.perfectStreak = 0;
+          state.progressStep = 0;
+          state.stepsToFinish = Number(config.gameplay.stepsToFinish || 5);
+          state.accuracy = 0;
+          state.score = 0;
+          state.displayedScore = 0;
+          state.scoreAnimating = false;
+          state.energy = 0;
+          state.achievementsUnlocked = [];
+          state.usedFreezeAnyTime = false;
+          state.indicator.position = 0;
+          state.indicator.direction = 1;
+          state.indicator.speed = Number(config.movement.defaultSpeed || 300);
+          state.indicator.movementType = config.movement.movementType || 'pingpong';
+          state.bonuses.freezeActive = false;
+          state.bonuses.freezeRemainingMs = 0;
+          state.bonuses.freezeResumeStatus = null;
+          resetRoundState();
+        }
+
+        const api = {
+          init(userConfig = {}, userQuestions = null, mountTarget = '#moment-of-truth-root') {
+            destroyTimers();
+            config = deepMerge(DEFAULT_CONFIG, userConfig || {});
+            audio = createAudioManager(config);
+            const nextQuestions = Array.isArray(userQuestions) ? userQuestions : questions;
+            validateQuestions(nextQuestions, config.gameplay.maxAnswerLength);
+            questions = nextQuestions.map((q) => ({ ...q, answers: q.answers.slice() }));
+            const mountEl = typeof mountTarget === 'string' ? document.querySelector(mountTarget) : mountTarget;
+            if (!mountEl) throw new Error('Mount element not found.');
+            buildDOM(mountEl);
+            applyThemeConfig();
+            resetState();
+            emit('GAME_INIT', { config, questions });
+            loadQuestion(0);
+            setStatus('idle');
+            return this;
+          },
+          start() {
+            if (!rootEl) throw new Error('Call MomentOfTruth.init(config) before start().');
+            if (state.status === 'idle' || state.status === 'question_ready' || state.status === 'transition_next') {
+              emit('GAME_START', { state: getPublicState() });
+              startIndicator();
+              if (!rafId) rafId = requestAnimationFrame(tick);
+            }
+            return this;
+          },
+          restart() {
+            destroyTimers();
+            resetState();
+            emit('GAME_RESTART', { state: getPublicState() });
+            loadQuestion(0);
+            render();
+            this.start();
+            return this;
+          },
+          showIntro() {
+            destroyTimers();
+            resetState();
+            emit('GAME_INTRO', { state: getPublicState() });
+            loadQuestion(0);
+            setStatus('idle');
+            return this;
+          },
+          destroy() {
+            destroyTimers();
+            audio.shutdown();
+            if (resizeObserver) { resizeObserver.disconnect(); resizeObserver = null; }
+            else window.removeEventListener('resize', renderIndicator);
+            if (rootEl && rootEl.parentNode) rootEl.parentNode.removeChild(rootEl);
+            rootEl = null;
+          },
+          getState() { return getPublicState(); },
+          getConfig() { return JSON.parse(JSON.stringify(config)); },
+          setConfig(nextConfig = {}) {
+            config = deepMerge(config, nextConfig);
+            audio = createAudioManager(config);
+            state.stepsToFinish = Number(config.gameplay.stepsToFinish || state.stepsToFinish);
+            applyThemeConfig();
+            render();
+            return this;
+          },
+          getTheme() {
+            return JSON.parse(JSON.stringify(config.theme || {}));
+          },
+          setTheme(nextTheme = {}) {
+            config.theme = deepMerge(config.theme || {}, nextTheme);
+            applyThemeConfig();
+            render();
+            return this;
+          },
+          setFonts(nextFonts = {}) {
+            return this.setTheme({ fonts: nextFonts });
+          },
+          loadQuestions(nextQuestions = []) {
+            validateQuestions(nextQuestions, config.gameplay.maxAnswerLength);
+            questions = nextQuestions.map((q) => ({ ...q, answers: q.answers.slice() }));
+            resetState();
+            loadQuestion(0);
+            render();
+            return this;
+          }
+        };
+
+        return api;
+      }
+
+      window.MomentOfTruth = createGame();
+
+      const demoConfig = {
+        gameplay: {
+          lives: 3,
+          stepsToFinish: 6,
+          maxAnswerLength: 40,
+          scoreCountDurationMs: 1100
+        },
+        movement: {
+          movementType: 'pingpong',
+          minStopDelayMs: 800,
+          defaultSpeed: 320,
+          indicatorType: 'runner'
+        },
+        bonuses: {
+          freezeDurationMs: 10000,
+          energyEnabled: true,
+          energyMax: 100,
+          freezeCost: 100,
+          fiftyCost: 60,
+          energyGainCorrect: 30,
+          energyGainPerfect: 20,
+          energyLossWrong: 20
+        },
+        perfect: {
+          enabled: true,
+          thresholdRatio: 0.12,
+          text: 'ИДЕАЛ!'
+        },
+        audio: { enabled: true, volume: 0.05 }
+      };
+
+      const demoQuestions = DEFAULT_QUESTIONS;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        window.MomentOfTruth.init(demoConfig, demoQuestions, '#moment-of-truth-root');
+      });
+    })();
+  </script>
+</body>
+</html>
