@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Редактор — Момент истины</title>
+  <style>
+    :root {
+      --editor-bg: #07111f;
+      --editor-panel: rgba(10, 18, 32, 0.92);
+      --editor-panel-soft: rgba(15, 27, 47, 0.9);
+      --editor-border: rgba(101, 163, 214, 0.16);
+      --editor-text: #f4fbff;
+      --editor-muted: #92a9c2;
+      --editor-accent: #4fd0ff;
+      --editor-accent-2: #58efb4;
+      --editor-danger: #ff7b93;
+      --editor-shadow: 0 24px 56px rgba(0, 0, 0, 0.34);
+      --editor-radius: 22px;
+      --editor-font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+      --editor-tech: "Bahnschrift", "Segoe UI", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--editor-accent) 28%, transparent), transparent 26%),
+        radial-gradient(circle at 80% 100%, color-mix(in srgb, var(--editor-accent-2) 20%, transparent), transparent 28%),
+        linear-gradient(180deg, var(--editor-bg), color-mix(in srgb, var(--editor-bg) 38%, #02050b));
+      color: var(--editor-text);
+      font-family: var(--editor-font);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    .editor-shell {
+      display: grid;
+      grid-template-columns: minmax(360px, 520px) minmax(0, 1fr);
+      gap: 18px;
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    .editor-panel {
+      border: 1px solid var(--editor-border);
+      border-radius: var(--editor-radius);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+        linear-gradient(180deg, var(--editor-panel), rgba(5, 11, 20, 0.97));
+      box-shadow: var(--editor-shadow);
+      overflow: hidden;
+    }
+
+    .editor-sidebar {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+
+    .editor-head {
+      padding: 24px 24px 16px;
+      border-bottom: 1px solid rgba(101, 163, 214, 0.10);
+    }
+
+    .editor-eyebrow {
+      margin-bottom: 10px;
+      color: var(--editor-muted);
+      font-family: var(--editor-tech);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .editor-title {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 3vw, 40px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .editor-subtitle {
+      margin: 0;
+      color: var(--editor-muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .editor-body {
+      overflow: auto;
+      padding: 18px 24px 24px;
+    }
+
+    .editor-section + .editor-section {
+      margin-top: 22px;
+    }
+
+    .editor-section__title {
+      margin: 0 0 12px;
+      font-family: var(--editor-tech);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--editor-text) 88%, #9ec9e2);
+    }
+
+    .editor-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .editor-grid--single {
+      grid-template-columns: 1fr;
+    }
+
+    .editor-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .editor-label {
+      color: var(--editor-muted);
+      font-size: 13px;
+    }
+
+    .editor-input,
+    .editor-select,
+    .editor-textarea {
+      width: 100%;
+      border: 1px solid rgba(101, 163, 214, 0.14);
+      border-radius: 14px;
+      background: rgba(6, 14, 26, 0.92);
+      color: var(--editor-text);
+      padding: 12px 14px;
+    }
+
+    .editor-textarea {
+      min-height: 94px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .editor-color-picker {
+      width: 100%;
+      min-height: 52px;
+      padding: 6px;
+      border: 1px solid rgba(101, 163, 214, 0.14);
+      border-radius: 14px;
+      background: rgba(6, 14, 26, 0.92);
+      cursor: pointer;
+    }
+
+    .editor-color-picker::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .editor-color-picker::-webkit-color-swatch {
+      border: none;
+      border-radius: 10px;
+    }
+
+    .editor-range {
+      width: 100%;
+      accent-color: var(--editor-accent);
+      cursor: pointer;
+    }
+
+    .editor-theme-chip {
+      min-height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(101, 163, 214, 0.14);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--editor-accent) 20%, transparent), transparent),
+        rgba(6, 14, 26, 0.92);
+      color: var(--editor-text);
+      padding: 0 14px;
+    }
+
+    .editor-note {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(11, 24, 41, 0.82);
+      border: 1px solid rgba(101, 163, 214, 0.10);
+      color: var(--editor-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .editor-note--compact {
+      margin-top: 8px;
+      padding: 10px 12px;
+    }
+
+    .editor-code {
+      min-height: 120px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .editor-questions {
+      display: grid;
+      gap: 14px;
+    }
+
+    .editor-question {
+      padding: 16px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(18, 31, 54, 0.94), rgba(8, 15, 28, 0.98));
+      border: 1px solid rgba(101, 163, 214, 0.10);
+    }
+
+    .editor-question--fresh {
+      border-color: rgba(88, 240, 178, 0.36);
+      box-shadow: 0 0 0 1px rgba(88, 240, 178, 0.14), 0 0 26px rgba(88, 240, 178, 0.12);
+    }
+
+    .editor-question--collapsed .editor-question__head {
+      margin-bottom: 0;
+    }
+
+    .editor-question--collapsed > :not(.editor-question__head) {
+      display: none;
+    }
+
+    .editor-question__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .editor-question__title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .editor-question__actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .editor-question__grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-bottom: 12px;
+    }
+
+    .editor-answers {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .editor-subhead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .editor-helper {
+      color: var(--editor-muted);
+      font-size: 12px;
+      font-family: var(--editor-tech);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .editor-answer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .editor-inline-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 18px 24px 24px;
+      border-top: 1px solid rgba(101, 163, 214, 0.10);
+    }
+
+    .editor-btn {
+      appearance: none;
+      border: 1px solid rgba(101, 163, 214, 0.18);
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(18, 32, 56, 0.96), rgba(10, 18, 31, 0.98));
+      color: var(--editor-text);
+      font-family: var(--editor-tech);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+
+    .editor-btn--primary {
+      color: #05111d;
+      background: linear-gradient(180deg, rgba(79, 208, 255, 0.96), rgba(34, 126, 173, 0.98));
+      border-color: rgba(162, 230, 255, 0.38);
+    }
+
+    .editor-btn--accent {
+      color: #041810;
+      background: linear-gradient(180deg, rgba(88, 240, 178, 0.96), rgba(33, 148, 105, 0.98));
+      border-color: rgba(171, 255, 223, 0.34);
+    }
+
+    .editor-btn--danger {
+      background: linear-gradient(180deg, rgba(91, 30, 48, 0.96), rgba(57, 16, 29, 0.98));
+      border-color: rgba(255, 123, 147, 0.24);
+      color: #ffe8ed;
+    }
+
+    .editor-preview {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+
+    .editor-preview__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid rgba(101, 163, 214, 0.10);
+    }
+
+    .editor-preview__head-main {
+      display: grid;
+      gap: 6px;
+    }
+
+    .editor-preview__title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .editor-preview__meta {
+      color: var(--editor-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      max-width: 42ch;
+    }
+
+    .editor-preview__frame-wrap {
+      padding: 12px;
+      min-height: 0;
+      height: calc(100vh - 132px);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
+    }
+
+    .editor-preview__stage {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      width: 1280px;
+      height: 760px;
+      min-height: 0;
+      flex: 0 0 auto;
+      transform-origin: top center;
+    }
+
+    .editor-preview__frame {
+      width: 1280px;
+      height: 760px;
+      border: 1px solid rgba(101, 163, 214, 0.14);
+      border-radius: 18px;
+      background: #020712;
+      flex: 0 0 auto;
+      display: block;
+    }
+
+    @media (max-width: 1280px) {
+      .editor-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-preview__frame-wrap {
+        height: min(78vh, 980px);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .editor-grid,
+      .editor-question__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-answer {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-preview__head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-shell">
+    <aside class="editor-panel editor-sidebar">
+      <div class="editor-head">
+        <div class="editor-eyebrow">Редактор проекта</div>
+        <h1 class="editor-title">Момент истины</h1>
+        <p class="editor-subtitle">Здесь мы настраиваем игру без кода: язык, базовые тексты, параметры раунда и сами вопросы. Справа всегда видно живой предпросмотр.</p>
+      </div>
+
+      <div class="editor-body">
+        <section class="editor-section">
+          <h2 class="editor-section__title">Основа проекта</h2>
+          <div class="editor-grid">
+            <label class="editor-field">
+              <span class="editor-label">Язык интерфейса</span>
+              <select class="editor-select" id="editor-locale"></select>
+            </label>
+            <label class="editor-field">
+              <span class="editor-label">Подпись финиша</span>
+              <input class="editor-input" id="editor-finish-label" type="text" />
+            </label>
+            <label class="editor-field">
+              <span class="editor-label">Название игры</span>
+              <input class="editor-input" id="editor-title" type="text" />
+            </label>
+            <label class="editor-field">
+              <span class="editor-label">Шаги до финиша</span>
+              <input class="editor-input" id="editor-steps" type="number" min="1" max="20" />
+            </label>
+          </div>
+          <div class="editor-note">Жизни в игре теперь фиксированы: `3`. Стартовый экран здесь не редактируется вручную и автоматически меняется вместе с выбранным языком.</div>
+        </section>
+
+        <section class="editor-section">
+          <h2 class="editor-section__title">Тема и атмосфера</h2>
+          <div class="editor-grid">
+            <label class="editor-field">
+              <span class="editor-label">Цвет общего фона</span>
+              <select class="editor-select editor-theme-chip" id="editor-theme-preset"></select>
+            </label>
+            <label class="editor-field">
+              <span class="editor-label">Неоновая подсветка</span>
+              <input class="editor-input" id="editor-theme-neon" type="hidden" value="#49d8ff" />
+            </label>
+            <label class="editor-field">
+              <span class="editor-label">Текст</span>
+              <input class="editor-input" id="editor-theme-text" type="hidden" value="#f5fbff" />
+            </label>
+          </div>
+          <div class="editor-grid" style="margin-top: 12px;">
+            <label class="editor-field">
+              <div class="editor-subhead">
+                <span class="editor-label">Прозрачность</span>
+                <span class="editor-helper" id="editor-bg-transparency-value">0%</span>
+              </div>
+              <input class="editor-range" id="editor-bg-transparency" type="range" min="0" max="100" step="1" value="0" />
+            </label>
+            <label class="editor-field" style="grid-column: 1 / -1;">
+              <div class="editor-subhead">
+                <span class="editor-label">Сила неона</span>
+                <span class="editor-helper" id="editor-neon-intensity-value">48%</span>
+              </div>
+              <input class="editor-range" id="editor-neon-intensity" type="range" min="0" max="100" step="1" value="48" />
+            </label>
+          </div>
+          <div class="editor-note editor-note--compact">Неон теперь влияет в первую очередь на свечение сцены, а не перекрашивает весь интерфейс. Так внешний вид остается аккуратным даже при ярких цветах.</div>
+        </section>
+
+        <section class="editor-section">
+          <h2 class="editor-section__title">Вопросы</h2>
+          <div class="editor-questions" id="editor-questions-list"></div>
+          <div class="editor-inline-actions">
+            <button class="editor-btn editor-btn--accent" id="editor-add-question" type="button">Добавить вопрос</button>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="editor-actions">
+        <button class="editor-btn editor-btn--primary" id="editor-apply" type="button">Применить</button>
+        <button class="editor-btn" id="editor-reset" type="button">Сбросить</button>
+        <button class="editor-btn" id="editor-export" type="button">Скачать JSON</button>
+      </div>
+    </aside>
+
+    <section class="editor-panel editor-preview">
+      <div class="editor-preview__head">
+        <div class="editor-preview__head-main">
+          <h2 class="editor-preview__title">Предпросмотр</h2>
+          <div class="editor-preview__meta">Справа всегда показывается основной экран игры с вопросами. Так удобнее настраивать именно игровую сцену, цвета и интерфейс.</div>
+        </div>
+        <button class="editor-btn" id="editor-preview-reload" type="button">Перезагрузить</button>
+      </div>
+      <div class="editor-preview__frame-wrap" id="editor-preview-frame-wrap">
+        <div class="editor-preview__stage" id="editor-preview-stage">
+          <iframe class="editor-preview__frame" id="editor-preview-frame" src="./good.html?editor=1&locale=ru" title="Предпросмотр игры"></iframe>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./moment-data.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      const data = window.MomentOfTruthContent || {};
+      const locales = data.locales || {};
+      const defaultLocale = data.defaultLocale || Object.keys(locales)[0] || 'ru';
+
+      const dom = {
+        locale: document.getElementById('editor-locale'),
+        finishLabel: document.getElementById('editor-finish-label'),
+        title: document.getElementById('editor-title'),
+        steps: document.getElementById('editor-steps'),
+        questionsList: document.getElementById('editor-questions-list'),
+        addQuestion: document.getElementById('editor-add-question'),
+        apply: document.getElementById('editor-apply'),
+        reset: document.getElementById('editor-reset'),
+        export: document.getElementById('editor-export'),
+        previewReload: document.getElementById('editor-preview-reload'),
+        themePreset: document.getElementById('editor-theme-preset'),
+        themeNeon: document.getElementById('editor-theme-neon'),
+        themeText: document.getElementById('editor-theme-text'),
+        bgTransparency: document.getElementById('editor-bg-transparency'),
+        bgTransparencyValue: document.getElementById('editor-bg-transparency-value'),
+        neonIntensity: document.getElementById('editor-neon-intensity'),
+        neonIntensityValue: document.getElementById('editor-neon-intensity-value'),
+        frameWrap: document.getElementById('editor-preview-frame-wrap'),
+        frameStage: document.getElementById('editor-preview-stage'),
+        frame: document.getElementById('editor-preview-frame')
+      };
+
+      if (dom.themeText && dom.themeText.parentElement && dom.themeText.parentElement.classList.contains('editor-field')) {
+        dom.themeText.parentElement.remove();
+      }
+      if (dom.themeNeon && dom.themeNeon.parentElement && dom.themeNeon.parentElement.classList.contains('editor-field')) {
+        dom.themeNeon.parentElement.remove();
+      }
+      if (dom.themePreset && dom.themePreset.closest('.editor-field')) {
+        const presetLabel = dom.themePreset.closest('.editor-field').querySelector('.editor-label');
+        if (presetLabel) presetLabel.textContent = 'Тема';
+      }
+
+      function normalizeEditorLayout() {
+        const topSections = document.querySelectorAll('.editor-body > .editor-section');
+        topSections.forEach((section, index) => {
+          if (index < 2) {
+            section.querySelectorAll(':scope > .editor-note').forEach((note) => note.remove());
+          }
+        });
+        if (dom.apply) dom.apply.remove();
+        if (dom.export) dom.export.textContent = 'Скачать проект';
+        if (dom.previewReload) {
+          dom.previewReload.textContent = 'Обновить превью';
+          dom.previewReload.classList.add('editor-btn--primary');
+        }
+        const previewMeta = document.querySelector('.editor-preview__meta');
+        if (previewMeta) previewMeta.textContent = 'Справа виден экран игры с вопросами. Здесь удобно проверять вид сцены и интерфейса.';
+        const themePresetField = dom.themePreset ? dom.themePreset.closest('.editor-field') : null;
+        if (themePresetField) {
+          const presetLabel = themePresetField.querySelector('.editor-label');
+          if (presetLabel) presetLabel.textContent = 'Тема';
+        }
+        const transparencyField = document.getElementById('editor-bg-transparency')
+          ? document.getElementById('editor-bg-transparency').closest('.editor-field')
+          : null;
+        const topThemeGrid = themePresetField ? themePresetField.closest('.editor-grid') : null;
+        if (themePresetField && transparencyField && topThemeGrid && transparencyField.parentElement !== topThemeGrid) {
+          themePresetField.insertAdjacentElement('afterend', transparencyField);
+        }
+      }
+      normalizeEditorLayout();
+      window.setTimeout(normalizeEditorLayout, 0);
+
+      let draft;
+      let previewTimer = 0;
+      let questionIdCounter = 1;
+      let freshQuestionIndex = -1;
+      const collapsedQuestionIds = new Set();
+      const previewBaseSize = { width: 1280, height: 760 };
+      const THEME_DEFAULTS = {
+        colors: {
+          bg: '#06111f',
+          bgDeep: '#030814',
+          text: '#f5fbff',
+          muted: '#90a6c3',
+          accent: '#59f3b2',
+          accent2: '#49d8ff',
+          accent3: '#ffd76a',
+          correct: '#39d98a',
+          wrong: '#ff5f7a',
+          danger: '#ff5f7a',
+          warning: '#ffb84d'
+        },
+        scene: {
+          top: '#0b1d33',
+          mid: '#081426',
+          bottom: '#050c18',
+          glow1: 'rgba(22,126,173,0.16)',
+          glow2: 'rgba(21,74,112,0.10)',
+          aurora1: 'rgba(63,143,198,0.14)',
+          aurora2: 'rgba(63,143,198,0.10)',
+          aurora3: 'rgba(30,126,148,0.10)'
+        },
+        panels: {
+          top: 'rgba(10,19,34,0.90)',
+          bottom: 'rgba(5,10,20,0.94)',
+          glow: 'rgba(92,154,196,0.04)'
+        }
+      };
+      const THEME_PRESETS = {
+        ocean: {
+          label: 'Океан',
+          editor: { bg: '#081426', panel: 'rgba(10, 18, 32, 0.92)', panelSoft: 'rgba(15, 27, 47, 0.9)', border: 'rgba(101, 163, 214, 0.16)', text: '#f4fbff', muted: '#92a9c2', accent: '#4fd0ff', accent2: '#58efb4' },
+          game: { bg: '#06111f', bgDeep: '#030814', text: '#f5fbff', top: '#0b1d33', mid: '#081426', bottom: '#050c18', panelTop: '#0b1a31', panelBottom: '#060d19', neon: '#49d8ff', accent: '#59f3b2', accentGlow: '#49d8ff' }
+        },
+        emerald: {
+          label: 'Изумруд',
+          editor: { bg: '#081c1a', panel: 'rgba(10, 27, 24, 0.92)', panelSoft: 'rgba(14, 37, 33, 0.9)', border: 'rgba(103, 195, 171, 0.16)', text: '#effcf8', muted: '#9cc2b7', accent: '#59f3b2', accent2: '#7cf7d0' },
+          game: { bg: '#071715', bgDeep: '#030b0a', text: '#f3fffb', top: '#0c2420', mid: '#091714', bottom: '#050c0b', panelTop: '#0c211d', panelBottom: '#07110f', neon: '#59f3b2', accent: '#7cf7d0', accentGlow: '#59f3b2' }
+        },
+        ember: {
+          label: 'Янтарь',
+          editor: { bg: '#1a100c', panel: 'rgba(34, 21, 15, 0.92)', panelSoft: 'rgba(45, 28, 19, 0.9)', border: 'rgba(227, 149, 94, 0.16)', text: '#fff7f1', muted: '#cdb1a0', accent: '#ff9248', accent2: '#ffd76a' },
+          game: { bg: '#170d09', bgDeep: '#090403', text: '#fff7f1', top: '#28150f', mid: '#140b08', bottom: '#090403', panelTop: '#22140f', panelBottom: '#0c0705', neon: '#ff9248', accent: '#ffd76a', accentGlow: '#ff9248' }
+        },
+        rose: {
+          label: 'Роза',
+          editor: { bg: '#170d15', panel: 'rgba(30, 15, 27, 0.92)', panelSoft: 'rgba(42, 20, 37, 0.9)', border: 'rgba(212, 125, 168, 0.16)', text: '#fff5fb', muted: '#c8a9bc', accent: '#ff7bb9', accent2: '#ff9bca' },
+          game: { bg: '#160b13', bgDeep: '#08040a', text: '#fff5fb', top: '#24101f', mid: '#130913', bottom: '#08040a', panelTop: '#21101d', panelBottom: '#0a0509', neon: '#ff5ea8', accent: '#ff93c8', accentGlow: '#ff5ea8' }
+        },
+        graphite: {
+          label: 'Графит',
+          editor: { bg: '#10161d', panel: 'rgba(16, 22, 30, 0.92)', panelSoft: 'rgba(23, 31, 42, 0.9)', border: 'rgba(132, 157, 181, 0.16)', text: '#f2f7fb', muted: '#99adbf', accent: '#8fc3ff', accent2: '#c6d8ec' },
+          game: { bg: '#0c1218', bgDeep: '#05080c', text: '#f4f8fc', top: '#141d28', mid: '#0d141d', bottom: '#05080c', panelTop: '#121b26', panelBottom: '#080c12', neon: '#d8e6ff', accent: '#c6d8ec', accentGlow: '#d8e6ff' }
+        }
+      };
+      const DEFAULT_THEME_PRESET = 'ocean';
+      draft = buildDraft(defaultLocale);
+
+      function deepClone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function deepMerge(target, source) {
+        const output = Array.isArray(target) ? target.slice() : { ...target };
+        if (!source || typeof source !== 'object') return output;
+        Object.keys(source).forEach((key) => {
+          const value = source[key];
+          if (Array.isArray(value)) output[key] = value.slice();
+          else if (value && typeof value === 'object') output[key] = deepMerge(output[key] && typeof output[key] === 'object' ? output[key] : {}, value);
+          else output[key] = value;
+        });
+        return output;
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function hexToRgb(hex) {
+        const normalized = String(hex || '').trim().replace('#', '');
+        if (!normalized) return null;
+        const value = normalized.length === 3
+          ? normalized.split('').map((part) => part + part).join('')
+          : normalized;
+        if (value.length !== 6) return null;
+        return {
+          r: parseInt(value.slice(0, 2), 16),
+          g: parseInt(value.slice(2, 4), 16),
+          b: parseInt(value.slice(4, 6), 16)
+        };
+      }
+
+      function parseColorString(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return null;
+        if (raw[0] === '#') {
+          const rgb = hexToRgb(raw);
+          return rgb ? { ...rgb, a: 1 } : null;
+        }
+        const match = raw.match(/rgba?\(([^)]+)\)/i);
+        if (!match) return null;
+        const parts = match[1].split(',').map((part) => part.trim());
+        if (parts.length < 3) return null;
+        return {
+          r: clamp(Number(parts[0]), 0, 255),
+          g: clamp(Number(parts[1]), 0, 255),
+          b: clamp(Number(parts[2]), 0, 255),
+          a: parts[3] == null ? 1 : clamp(Number(parts[3]), 0, 1)
+        };
+      }
+
+      function rgbToHex(rgb, fallback = '#000000') {
+        if (!rgb) return fallback;
+        const toHex = (value) => clamp(Math.round(value), 0, 255).toString(16).padStart(2, '0');
+        return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+      }
+
+      function normalizeHexColor(value, fallback = '#000000') {
+        const parsed = parseColorString(value);
+        return rgbToHex(parsed, fallback);
+      }
+
+      function alphaFromColor(value, fallback = 1) {
+        const parsed = parseColorString(value);
+        return parsed ? parsed.a : fallback;
+      }
+
+      function rgbaFromHex(hex, alpha) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) return `rgba(0,0,0,${clamp(alpha, 0, 1)})`;
+        return `rgba(${rgb.r},${rgb.g},${rgb.b},${clamp(alpha, 0, 1).toFixed(2)})`;
+      }
+
+      function mixHexColors(firstHex, secondHex, secondWeight) {
+        const first = hexToRgb(firstHex) || hexToRgb('#000000');
+        const second = hexToRgb(secondHex) || hexToRgb('#000000');
+        const ratio = clamp(Number(secondWeight), 0, 1);
+        const inverse = 1 - ratio;
+        return rgbToHex({
+          r: first.r * inverse + second.r * ratio,
+          g: first.g * inverse + second.g * ratio,
+          b: first.b * inverse + second.b * ratio
+        }, firstHex);
+      }
+
+      function transparencyToAlpha(value) {
+        return clamp(1 - (Number(value || 0) / 100), 0, 1);
+      }
+
+      function alphaToTransparency(alpha) {
+        return Math.round((1 - clamp(Number(alpha), 0, 1)) * 100);
+      }
+
+      function glowIntensityToAlpha(value) {
+        return 0.02 + clamp(Number(value || 0), 0, 100) * 0.0068;
+      }
+
+      function alphaToGlowIntensity(alpha) {
+        return Math.round(clamp((Number(alpha || 0) - 0.02) / 0.0068, 0, 100));
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function encodeBase64UrlUnicode(value) {
+        const json = typeof value === 'string' ? value : JSON.stringify(value);
+        let base64 = '';
+        if (typeof TextEncoder !== 'undefined') {
+          const bytes = new TextEncoder().encode(json);
+          let binary = '';
+          bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+          base64 = window.btoa(binary);
+        } else {
+          base64 = window.btoa(unescape(encodeURIComponent(json)));
+        }
+        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+      }
+
+      function buildPreviewPayload() {
+        return {
+          locale: draft.locale,
+          config: deepClone(draft.config),
+          questions: buildPreviewQuestions()
+        };
+      }
+
+      function getObjectDiff(currentValue, baseValue) {
+        if (Array.isArray(currentValue) || Array.isArray(baseValue)) {
+          return JSON.stringify(currentValue) === JSON.stringify(baseValue) ? undefined : deepClone(currentValue);
+        }
+
+        if (currentValue && typeof currentValue === 'object' && baseValue && typeof baseValue === 'object') {
+          const diff = {};
+          Object.keys(currentValue).forEach((key) => {
+            const nextDiff = getObjectDiff(currentValue[key], baseValue[key]);
+            if (nextDiff !== undefined) diff[key] = nextDiff;
+          });
+          return Object.keys(diff).length ? diff : undefined;
+        }
+
+        return currentValue === baseValue ? undefined : currentValue;
+      }
+
+      function buildSerializablePayload() {
+        const baseConfig = buildBaseConfig(draft.locale);
+        const baseQuestions = deepClone(getLocalePack(draft.locale).questions || []);
+        const configDiff = getObjectDiff(draft.config, baseConfig);
+        const questionsDiff = JSON.stringify(draft.questions) === JSON.stringify(baseQuestions)
+          ? undefined
+          : deepClone(draft.questions);
+        const payload = { locale: draft.locale };
+        if (configDiff && Object.keys(configDiff).length) payload.config = configDiff;
+        if (questionsDiff) payload.questions = questionsDiff;
+        return payload;
+      }
+
+      function getLocalePack(localeCode) {
+        return locales[localeCode] || locales[defaultLocale] || {};
+      }
+
+      function getPreviewPlaceholders(localeCode) {
+        const map = {
+          ru: { question: 'Предпросмотр вопроса', answer: 'Ответ' },
+          en: { question: 'Preview question', answer: 'Answer' },
+          de: { question: 'Vorschaufrage', answer: 'Antwort' },
+          fr: { question: 'Question d’aperçu', answer: 'Réponse' },
+          es: { question: 'Pregunta de vista previa', answer: 'Respuesta' },
+          zh: { question: '预览题目', answer: '选项' }
+        };
+        return map[localeCode] || map.en;
+      }
+
+      function buildBaseConfig(localeCode) {
+        const localePack = getLocalePack(localeCode);
+        const config = deepMerge(data.demoConfig || {}, localePack.configPatch || {});
+        config.content = config.content || {};
+        config.content.locale = localeCode;
+        config.content.editorThemePreset = config.content.editorThemePreset || DEFAULT_THEME_PRESET;
+        return config;
+      }
+
+      function getThemePreset() {
+        const presetKey = draft && draft.config && draft.config.content && draft.config.content.editorThemePreset;
+        if (presetKey === 'graphite') return DEFAULT_THEME_PRESET;
+        return THEME_PRESETS[presetKey] ? presetKey : DEFAULT_THEME_PRESET;
+      }
+
+      function populateThemePresetOptions() {
+        if (!dom.themePreset) return;
+        dom.themePreset.innerHTML = Object.entries(THEME_PRESETS)
+          .filter(([value]) => value !== 'graphite')
+          .map(([value, preset]) => `<option value="${value}">${preset.label}</option>`)
+          .join('');
+      }
+
+      function applyEditorTheme() {
+        const root = document.documentElement;
+        root.style.setProperty('--editor-bg', '#07111f');
+        root.style.setProperty('--editor-panel', 'rgba(10, 18, 32, 0.92)');
+        root.style.setProperty('--editor-panel-soft', 'rgba(15, 27, 47, 0.9)');
+        root.style.setProperty('--editor-border', 'rgba(101, 163, 214, 0.16)');
+        root.style.setProperty('--editor-text', '#f4fbff');
+        root.style.setProperty('--editor-muted', '#92a9c2');
+        root.style.setProperty('--editor-accent', '#4fd0ff');
+        root.style.setProperty('--editor-accent-2', '#58efb4');
+      }
+
+      function buildPreviewQuestions() {
+        const placeholders = getPreviewPlaceholders(draft.locale);
+        const sourceQuestions = Array.isArray(draft.questions) && draft.questions.length ? draft.questions : [createEmptyQuestion()];
+        return sourceQuestions.map((question, index) => {
+          const answers = Array.isArray(question.answers) ? question.answers.slice(0, 5).map((answer) => String(answer || '').trim()) : [];
+          while (answers.length < 3) answers.push('');
+          const normalizedAnswers = answers.map((answer, answerIndex) => answer || `${placeholders.answer} ${answerIndex + 1}`);
+          return {
+            id: question.id || `preview_question_${index + 1}`,
+            question: String(question.question || '').trim() || placeholders.question,
+            answers: normalizedAnswers,
+            correct_index: clamp(Number(question.correct_index || 0), 0, normalizedAnswers.length - 1),
+            speed: Math.max(100, Number(question.speed || (draft.config.movement && draft.config.movement.defaultSpeed) || 320)),
+            mode: question.mode || 'normal'
+          };
+        });
+      }
+
+      function ensureThemeDraft() {
+        draft.config.theme = draft.config.theme || {};
+        draft.config.theme.colors = draft.config.theme.colors || {};
+        draft.config.theme.scene = draft.config.theme.scene || {};
+        draft.config.theme.panels = draft.config.theme.panels || {};
+      }
+
+      function getThemeValue(section, key, fallback) {
+        ensureThemeDraft();
+        const sectionData = draft.config.theme[section] || {};
+        if (sectionData[key] !== undefined && sectionData[key] !== null && sectionData[key] !== '') return sectionData[key];
+        const themeDefaults = THEME_DEFAULTS[section] || {};
+        if (themeDefaults[key] !== undefined) return themeDefaults[key];
+        return fallback;
+      }
+
+      function syncThemeSliderValues() {
+        dom.bgTransparencyValue.textContent = `${dom.bgTransparency.value}%`;
+        dom.neonIntensityValue.textContent = `${dom.neonIntensity.value}%`;
+      }
+
+      function syncThemeInputsFromDraft() {
+        const presetKey = getThemePreset();
+        const preset = THEME_PRESETS[presetKey] || THEME_PRESETS[DEFAULT_THEME_PRESET];
+        if (dom.themePreset) dom.themePreset.value = presetKey;
+        dom.themeNeon.value = preset.game.neon;
+        dom.bgTransparency.value = String(alphaToTransparency(alphaFromColor(getThemeValue('scene', 'top', THEME_DEFAULTS.scene.top), 1)));
+        dom.neonIntensity.value = String(alphaToGlowIntensity(alphaFromColor(getThemeValue('scene', 'glow1', THEME_DEFAULTS.scene.glow1), 0.16)));
+        syncThemeSliderValues();
+        applyEditorTheme();
+      }
+
+      function updateThemeFromInputs() {
+        ensureThemeDraft();
+        draft.config.content = draft.config.content || {};
+        draft.config.content.editorThemePreset = (dom.themePreset && dom.themePreset.value) || DEFAULT_THEME_PRESET;
+        const preset = THEME_PRESETS[getThemePreset()] || THEME_PRESETS[DEFAULT_THEME_PRESET];
+        const bgTintColor = THEME_DEFAULTS.colors.bg;
+        const bgDeepColor = THEME_DEFAULTS.colors.bgDeep;
+        const neonColor = preset.game.neon;
+        const bgAlpha = transparencyToAlpha(dom.bgTransparency.value);
+        const panelAlpha = Math.max(bgAlpha - 0.08, 0.12);
+        const neonAlpha = glowIntensityToAlpha(dom.neonIntensity.value);
+        const accentPrimary = preset.game.accent || mixHexColors(THEME_DEFAULTS.colors.accent, neonColor, 0.42);
+        const accentGlow = preset.game.accentGlow || mixHexColors(THEME_DEFAULTS.colors.accent2, neonColor, 0.68);
+        const accentGold = THEME_DEFAULTS.colors.accent3;
+
+        draft.config.theme.colors.bg = bgTintColor;
+        draft.config.theme.colors.bgDeep = bgDeepColor;
+        draft.config.theme.colors.text = THEME_DEFAULTS.colors.text;
+        draft.config.theme.colors.muted = THEME_DEFAULTS.colors.muted;
+        draft.config.theme.colors.accent = accentPrimary;
+        draft.config.theme.colors.accent2 = accentGlow;
+        draft.config.theme.colors.accent3 = accentGold;
+        draft.config.theme.colors.correct = THEME_DEFAULTS.colors.correct;
+        draft.config.theme.colors.wrong = THEME_DEFAULTS.colors.wrong;
+        draft.config.theme.colors.danger = THEME_DEFAULTS.colors.danger;
+        draft.config.theme.colors.warning = THEME_DEFAULTS.colors.warning;
+
+        draft.config.theme.scene.top = rgbaFromHex(THEME_DEFAULTS.scene.top, bgAlpha);
+        draft.config.theme.scene.mid = rgbaFromHex(THEME_DEFAULTS.scene.mid, bgAlpha);
+        draft.config.theme.scene.bottom = rgbaFromHex(THEME_DEFAULTS.scene.bottom, bgAlpha);
+        draft.config.theme.scene.glow1 = rgbaFromHex(neonColor, Math.max(neonAlpha * 0.06, 0.004));
+        draft.config.theme.scene.glow2 = rgbaFromHex(neonColor, Math.max(neonAlpha * 0.03, 0.002));
+        draft.config.theme.scene.aurora1 = 'rgba(0,0,0,0)';
+        draft.config.theme.scene.aurora2 = 'rgba(0,0,0,0)';
+        draft.config.theme.scene.aurora3 = 'rgba(0,0,0,0)';
+        draft.config.theme.scene.gridLine = rgbaFromHex(neonColor, Math.max(neonAlpha * bgAlpha * 0.08, 0.004));
+
+        draft.config.theme.panels.top = rgbaFromHex('#0b1a31', panelAlpha);
+        draft.config.theme.panels.bottom = rgbaFromHex('#060d19', Math.max(panelAlpha, 0.04));
+        draft.config.theme.panels.glow = rgbaFromHex(neonColor, Math.max(neonAlpha * 1.05, 0.08));
+        draft.config.theme.panels.border = rgbaFromHex(accentGlow, Math.max(neonAlpha * 0.72, 0.12));
+        draft.config.theme.colors.border = rgbaFromHex(accentGlow, Math.max(neonAlpha * 0.58, 0.1));
+        draft.config.theme.colors.grid = rgbaFromHex(accentGlow, Math.max(neonAlpha * 0.16, 0.01));
+        syncThemeSliderValues();
+        applyEditorTheme();
+      }
+
+      function buildDraft(localeCode) {
+        return {
+          locale: localeCode,
+          config: buildBaseConfig(localeCode),
+          questions: deepClone(getLocalePack(localeCode).questions || [])
+        };
+      }
+
+      function ensureQuestionIds() {
+        draft.questions.forEach((question) => {
+          if (!question.id) {
+            question.id = 'question_' + questionIdCounter++;
+            return;
+          }
+          const match = String(question.id).match(/(\d+)$/);
+          if (match) questionIdCounter = Math.max(questionIdCounter, Number(match[1]) + 1);
+        });
+      }
+
+      function createEmptyQuestion() {
+        return {
+          id: 'question_' + questionIdCounter++,
+          question: '',
+          answers: ['', '', ''],
+          correct_index: 0,
+          speed: Number((draft.config.movement && draft.config.movement.defaultSpeed) || 320),
+          mode: 'normal'
+        };
+      }
+
+      function getModeOptions() {
+        const pack = getLocalePack(draft.locale);
+        const labels = (pack.ui && pack.ui.modes) || {};
+        return [
+          { value: 'normal', label: 'Обычный' },
+          { value: 'speed', label: labels.speed || 'Темп' },
+          { value: 'safe', label: labels.safe || 'Щит' },
+          { value: 'double_step', label: labels.double_step || 'X2 шаг' },
+          { value: 'boss', label: labels.boss || 'Усиление' }
+        ];
+      }
+
+      function populateLocaleOptions() {
+        const codes = Object.keys(locales);
+        dom.locale.innerHTML = codes.map((code) => `<option value="${code}">${code.toUpperCase()}</option>`).join('');
+      }
+
+      function syncFormFromDraft() {
+        ensureQuestionIds();
+        dom.locale.value = draft.locale;
+        dom.finishLabel.value = (draft.config.progress && draft.config.progress.finishLabel) || '';
+        dom.title.value = (draft.config.content && draft.config.content.title) || '';
+        dom.steps.value = String((draft.config.gameplay && draft.config.gameplay.stepsToFinish) || 5);
+        syncThemeInputsFromDraft();
+        renderQuestionsEditor();
+      }
+
+      function renderQuestionsEditor() {
+        const modeOptions = getModeOptions();
+        dom.questionsList.innerHTML = draft.questions.map((question, index) => {
+          const isCollapsed = collapsedQuestionIds.has(question.id);
+          const correctOptions = question.answers.map((answer, answerIndex) => {
+            const label = answer && answer.trim() ? answer : `Ответ ${answerIndex + 1}`;
+            return `<option value="${answerIndex}" ${answerIndex === Number(question.correct_index || 0) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+          }).join('');
+
+          const answersMarkup = question.answers.map((answer, answerIndex) => `
+            <div class="editor-answer">
+              <input
+                class="editor-input"
+                type="text"
+                data-role="answer-text"
+                data-index="${index}"
+                data-answer-index="${answerIndex}"
+                value="${escapeHtml(answer)}"
+                placeholder="Ответ ${answerIndex + 1}"
+              />
+              ${question.answers.length > 3 ? `<button class="editor-btn editor-btn--danger" type="button" data-action="remove-answer" data-index="${index}" data-answer-index="${answerIndex}">Убрать</button>` : ''}
+            </div>
+          `).join('');
+
+          return `
+            <article class="editor-question ${index === freshQuestionIndex ? 'editor-question--fresh' : ''} ${isCollapsed ? 'editor-question--collapsed' : ''}" data-question-index="${index}">
+              <div class="editor-question__head">
+                <h3 class="editor-question__title">Вопрос ${index + 1}</h3>
+                <div class="editor-question__actions">
+                  <button class="editor-btn" type="button" data-action="duplicate-question" data-index="${index}">Дублировать</button>
+                  <button class="editor-btn editor-btn--danger" type="button" data-action="remove-question" data-index="${index}">Удалить</button>
+                </div>
+              </div>
+
+              <label class="editor-field">
+                <span class="editor-label">Текст вопроса</span>
+                <textarea class="editor-textarea" data-role="question-text" data-index="${index}" placeholder="Напиши вопрос">${escapeHtml(question.question)}</textarea>
+              </label>
+
+              <div class="editor-question__grid">
+                <label class="editor-field">
+                  <span class="editor-label">Режим раунда</span>
+                  <select class="editor-select" data-role="question-mode" data-index="${index}">
+                    ${modeOptions.map((option) => `<option value="${option.value}" ${option.value === (question.mode || 'normal') ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+                  </select>
+                </label>
+                <label class="editor-field">
+                  <span class="editor-label">Скорость индикатора</span>
+                  <input class="editor-input" type="number" min="100" max="800" step="10" data-role="question-speed" data-index="${index}" value="${escapeHtml(question.speed || 320)}" />
+                </label>
+              </div>
+
+              <label class="editor-field">
+                <span class="editor-label">Правильный ответ</span>
+                <select class="editor-select" data-role="question-correct" data-index="${index}">
+                  ${correctOptions}
+                </select>
+              </label>
+
+              <div class="editor-subhead">
+                <span class="editor-label">Варианты ответа</span>
+                <span class="editor-helper">${question.answers.length} из 5</span>
+              </div>
+
+              <div class="editor-note editor-note--compact">Минимум 3 ответа, максимум 5.</div>
+
+              <div class="editor-answers">
+                ${answersMarkup}
+              </div>
+
+              <div class="editor-inline-actions">
+                ${question.answers.length < 5 ? `<button class="editor-btn editor-btn--accent" type="button" data-action="add-answer" data-index="${index}">Добавить ответ</button>` : ''}
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        dom.questionsList.querySelectorAll('[data-action="duplicate-question"]').forEach((button) => {
+          button.textContent = 'Копия вопроса';
+        });
+
+        dom.questionsList.querySelectorAll('[data-action="duplicate-question"]').forEach((button) => {
+          const questionIndex = Number(button.dataset.index);
+          const question = draft.questions[questionIndex];
+          button.textContent = question && collapsedQuestionIds.has(question.id) ? 'Показать вопрос' : 'Скрыть вопрос';
+        });
+
+        if (freshQuestionIndex >= 0) {
+          const freshCard = dom.questionsList.querySelector(`[data-question-index="${freshQuestionIndex}"]`);
+          const freshTextarea = freshCard ? freshCard.querySelector('[data-role="question-text"]') : null;
+          if (freshCard) {
+            freshCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          if (freshTextarea) {
+            window.setTimeout(() => {
+              freshTextarea.focus();
+              freshTextarea.setSelectionRange(freshTextarea.value.length, freshTextarea.value.length);
+            }, 120);
+          }
+          window.setTimeout(() => {
+            freshQuestionIndex = -1;
+            const currentFresh = dom.questionsList.querySelector('.editor-question--fresh');
+            if (currentFresh) currentFresh.classList.remove('editor-question--fresh');
+          }, 1800);
+        }
+      }
+
+      function updateDraftFromBasics() {
+        draft.locale = dom.locale.value;
+        draft.config.content.locale = draft.locale;
+        draft.config.content.title = dom.title.value.trim() || 'Момент истины';
+        draft.config.progress = draft.config.progress || {};
+        draft.config.progress.finishLabel = dom.finishLabel.value.trim() || 'Финиш';
+        draft.config.gameplay = draft.config.gameplay || {};
+        draft.config.gameplay.lives = 3;
+        draft.config.gameplay.stepsToFinish = Math.max(1, Number(dom.steps.value || 5));
+      }
+
+      function validateDraft() {
+        if (!Array.isArray(draft.questions) || draft.questions.length === 0) {
+          throw new Error('Добавь хотя бы один вопрос.');
+        }
+
+        draft.questions.forEach((question, index) => {
+          question.question = String(question.question || '').trim();
+          if (!question.question) throw new Error(`У вопроса ${index + 1} нет текста.`);
+          if (!Array.isArray(question.answers) || question.answers.length < 3) throw new Error(`У вопроса ${index + 1} должно быть минимум 3 ответа.`);
+          if (question.answers.length > 5) throw new Error(`У вопроса ${index + 1} не может быть больше 5 ответов.`);
+          question.answers = question.answers.map((answer) => String(answer || '').trim());
+          if (question.answers.some((answer) => !answer)) throw new Error(`Заполни все ответы у вопроса ${index + 1}.`);
+          if (Number(question.correct_index) < 0 || Number(question.correct_index) >= question.answers.length) {
+            throw new Error(`У вопроса ${index + 1} выбран некорректный правильный ответ.`);
+          }
+        });
+      }
+
+      function syncPreviewScale() {
+        const wrap = dom.frameWrap;
+        const stage = dom.frameStage;
+        if (!wrap || !stage) return;
+        const availableWidth = Math.max(wrap.clientWidth - 36, 320);
+        const availableHeight = Math.max(wrap.clientHeight - 36, 320);
+        const scale = Math.min(
+          availableWidth / previewBaseSize.width,
+          availableHeight / previewBaseSize.height,
+          1
+        );
+        stage.style.width = `${previewBaseSize.width}px`;
+        stage.style.height = `${previewBaseSize.height}px`;
+        stage.style.transform = `scale(${scale})`;
+        dom.frame.style.transform = '';
+      }
+
+      function applyPreview(attempt = 0) {
+        const frameWindow = dom.frame.contentWindow;
+        if (!frameWindow) return;
+        if (!frameWindow.MomentOfTruth) {
+          if (attempt < 20) {
+            window.setTimeout(function () {
+              applyPreview(attempt + 1);
+            }, 120);
+          }
+          return;
+        }
+        frameWindow.MomentOfTruth.init(draft.config, buildPreviewQuestions(), '#moment-of-truth-root');
+        if (typeof frameWindow.MomentOfTruth.preview === 'function') {
+          frameWindow.MomentOfTruth.preview('game', { autoplay: true });
+        } else if (typeof frameWindow.MomentOfTruth.start === 'function') {
+          frameWindow.MomentOfTruth.start();
+        }
+        syncPreviewScale();
+      }
+
+      function applyThemePreview() {
+        const frameWindow = dom.frame.contentWindow;
+        if (!frameWindow || !frameWindow.MomentOfTruth || typeof frameWindow.MomentOfTruth.setTheme !== 'function') {
+          schedulePreview();
+          return;
+        }
+        updateThemeFromInputs();
+        frameWindow.MomentOfTruth.setTheme(draft.config.theme || {});
+        syncPreviewScale();
+      }
+
+      function reloadPreviewFrame() {
+        const previewPayload = encodeBase64UrlUnicode(buildPreviewPayload());
+        dom.frame.src = `./good.html?editor=1&locale=${encodeURIComponent(draft.locale)}&preview=${Date.now()}#mot=${previewPayload}`;
+      }
+
+      function schedulePreview() {
+        if (previewTimer) window.clearTimeout(previewTimer);
+        previewTimer = window.setTimeout(() => {
+          try {
+            applyPreview();
+          } catch (error) {
+            console.error(error);
+          }
+        }, 220);
+      }
+
+      function exportDraft() {
+        const payload = {
+          locale: draft.locale,
+          config: draft.config,
+          questions: draft.questions
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'moment-of-truth-config.json';
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function rebuildLocaleDraft(localeCode) {
+        if (previewTimer) {
+          window.clearTimeout(previewTimer);
+          previewTimer = 0;
+        }
+        const currentPreset = dom.themePreset && dom.themePreset.value ? dom.themePreset.value : DEFAULT_THEME_PRESET;
+        const currentTransparency = dom.bgTransparency ? dom.bgTransparency.value : null;
+        const currentNeonIntensity = dom.neonIntensity ? dom.neonIntensity.value : null;
+        collapsedQuestionIds.clear();
+        draft = buildDraft(localeCode);
+        draft.config.content = draft.config.content || {};
+        draft.config.content.editorThemePreset = currentPreset;
+        syncFormFromDraft();
+        if (currentTransparency != null) dom.bgTransparency.value = currentTransparency;
+        if (currentNeonIntensity != null) dom.neonIntensity.value = currentNeonIntensity;
+        updateThemeFromInputs();
+        reloadPreviewFrame();
+      }
+
+      dom.frame.addEventListener('load', function () {
+        try {
+          applyPreview();
+        } catch (error) {
+          console.error(error);
+        }
+      });
+
+      populateLocaleOptions();
+      populateThemePresetOptions();
+      syncFormFromDraft();
+      updateThemeFromInputs();
+      syncPreviewScale();
+      reloadPreviewFrame();
+
+      dom.locale.addEventListener('change', function () {
+        rebuildLocaleDraft(dom.locale.value);
+      });
+
+      [dom.finishLabel, dom.title, dom.steps].forEach((element) => {
+        element.addEventListener('input', function () {
+          updateDraftFromBasics();
+          schedulePreview();
+        });
+      });
+
+      [
+        dom.themePreset,
+        dom.bgTransparency,
+        dom.neonIntensity
+      ].filter(Boolean).forEach((element) => {
+        const handleThemeChange = function () {
+          applyThemePreview();
+        };
+        element.addEventListener('input', handleThemeChange);
+        element.addEventListener('change', handleThemeChange);
+      });
+
+      dom.questionsList.addEventListener('input', function (event) {
+        const target = event.target;
+        const index = Number(target.dataset.index);
+        const answerIndex = Number(target.dataset.answerIndex);
+        if (!draft.questions[index]) return;
+
+        if (target.dataset.role === 'question-text') {
+          draft.questions[index].question = target.value;
+        }
+
+        if (target.dataset.role === 'question-speed') {
+          draft.questions[index].speed = Math.max(100, Number(target.value || 320));
+        }
+
+        if (target.dataset.role === 'answer-text') {
+          draft.questions[index].answers[answerIndex] = target.value;
+        }
+
+        schedulePreview();
+      });
+
+      dom.questionsList.addEventListener('change', function (event) {
+        const target = event.target;
+        const index = Number(target.dataset.index);
+        if (!draft.questions[index]) return;
+
+        if (target.dataset.role === 'question-mode') {
+          draft.questions[index].mode = target.value;
+        }
+
+        if (target.dataset.role === 'question-correct') {
+          draft.questions[index].correct_index = Number(target.value || 0);
+        }
+
+        if (target.dataset.role === 'answer-text') {
+          renderQuestionsEditor();
+        }
+
+        schedulePreview();
+      });
+
+      dom.questionsList.addEventListener('click', function (event) {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const action = button.dataset.action;
+        const index = Number(button.dataset.index);
+        const answerIndex = Number(button.dataset.answerIndex);
+
+        if (action === 'remove-question') {
+          if (draft.questions[index]) collapsedQuestionIds.delete(draft.questions[index].id);
+          draft.questions.splice(index, 1);
+          if (draft.questions.length === 0) draft.questions.push(createEmptyQuestion());
+          renderQuestionsEditor();
+          schedulePreview();
+          return;
+        }
+
+        if (action === 'duplicate-question') {
+          const question = draft.questions[index];
+          if (!question) return;
+          if (collapsedQuestionIds.has(question.id)) collapsedQuestionIds.delete(question.id);
+          else collapsedQuestionIds.add(question.id);
+          freshQuestionIndex = -1;
+          renderQuestionsEditor();
+          return;
+        }
+
+        if (action === 'add-answer') {
+          if (draft.questions[index].answers.length < 5) {
+            draft.questions[index].answers.push('');
+            renderQuestionsEditor();
+            schedulePreview();
+          }
+          return;
+        }
+
+        if (action === 'remove-answer') {
+          if (draft.questions[index].answers.length > 3) {
+            draft.questions[index].answers.splice(answerIndex, 1);
+            draft.questions[index].correct_index = Math.min(
+              Number(draft.questions[index].correct_index || 0),
+              draft.questions[index].answers.length - 1
+            );
+            renderQuestionsEditor();
+            schedulePreview();
+          }
+        }
+      });
+
+      dom.addQuestion.addEventListener('click', function () {
+        draft.questions.push(createEmptyQuestion());
+        renderQuestionsEditor();
+        schedulePreview();
+      });
+
+      dom.apply.addEventListener('click', function () {
+        try {
+          updateDraftFromBasics();
+          updateThemeFromInputs();
+          applyPreview();
+        } catch (error) {
+          window.alert(error.message || 'Проверь заполнение редактора.');
+        }
+      });
+
+      dom.reset.addEventListener('click', function () {
+        rebuildLocaleDraft(dom.locale.value || defaultLocale);
+      });
+
+      dom.export.addEventListener('click', function () {
+        try {
+          updateDraftFromBasics();
+          updateThemeFromInputs();
+          validateDraft();
+          exportDraft();
+        } catch (error) {
+          window.alert(error.message || 'Сначала исправь данные, потом экспортируй.');
+        }
+      });
+
+      dom.previewReload.addEventListener('click', function () {
+        try {
+          updateDraftFromBasics();
+          updateThemeFromInputs();
+          reloadPreviewFrame();
+        } catch (error) {
+          window.alert(error.message || 'Не удалось перезагрузить предпросмотр.');
+        }
+      });
+
+      window.addEventListener('resize', syncPreviewScale);
+    })();
+  </script>
+</body>
+</html>
